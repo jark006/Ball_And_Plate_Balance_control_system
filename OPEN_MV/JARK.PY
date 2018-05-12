@@ -2,8 +2,8 @@ import sensor, image, time,math,pyb,json
 from pyb import Servo
 from pyb import UART
 
-#»ñÈ¡ºÚÇò×ø±ê£¬Êä³ö´®¿Ú(baudRate:115200)
-#ºÚÇòÉ«Óò
+#è·å–é»‘çƒåæ ‡ï¼Œè¾“å‡ºä¸²å£(baudRate:115200)
+#é»‘çƒè‰²åŸŸ
 Block_threshold   = (5,45,-20,35,-20,20)
 
 sensor.reset()
