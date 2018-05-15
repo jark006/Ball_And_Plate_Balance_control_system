@@ -79,14 +79,14 @@ int main(void)
     while(1)
     {
         key_scan();
-        if(UP && mainItem > 0)
+        if(UP && (mainItem > 0))
         {
             mainItem --;
             for(i=0; i<4; i++)
                 OLED_ShowString(0, i * 2 ,(u8*)" ", 16);
             OLED_ShowString(0, mainItem * 2 ,(u8*)">", 16);
         }
-        if(DOWN && mainItem < 3)
+        if(DOWN && (mainItem < 3))
         {
             mainItem ++;
             for(i=0; i<4; i++)

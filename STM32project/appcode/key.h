@@ -10,18 +10,18 @@
 #define K5 PBin(8)
 #define K6 PBin(7)
 
-#define keyclr  keynum =0
-#define Pressed keynum!=0
-#define K(n)    keynum==(n)
-#define F1      keynum==1
-#define F2      keynum==2
-#define F3      keynum==3
-#define CONF    keynum==4
-#define UP      keynum==5
-#define EXIT    keynum==6
-#define LEFT    keynum==7
-#define DOWN    keynum==8
-#define RIGHT   keynum==9
+#define keyclr  (keynum =0)
+#define Pressed (keynum!=0)
+#define K(n)    (keynum==(n))
+#define F1      (keynum==1)
+#define F2      (keynum==2)
+#define F3      (keynum==3)
+#define CONF    (keynum==4)
+#define UP      (keynum==5)
+#define EXIT    (keynum==6)
+#define LEFT    (keynum==7)
+#define DOWN    (keynum==8)
+#define RIGHT   (keynum==9)
 
 
 #define DELAY 10
