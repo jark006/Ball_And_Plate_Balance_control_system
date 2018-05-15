@@ -1,9 +1,9 @@
 import sensor, image, time,math,pyb,json
 from pyb import Servo
 from pyb import UART
-
-#获取黑球坐标，输出串口(baudRate:115200)
-#黑球色域
+# 作者：谢焕杰
+# 获取黑球坐标，输出串口(baudRate:115200)
+# 黑球色域
 Block_threshold   = (5,45,-20,35,-20,20)
 
 sensor.reset()
