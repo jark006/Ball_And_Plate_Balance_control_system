@@ -7,7 +7,7 @@ IDE:Keil MDK V5
 
 MCU:STM32F103ZET6
 
-摄像头：OPEN MV (code file:JARK.py)
+摄像头：OPEN MV (code file: ./OPEN_MV/OpenMV.py)
 
 屏幕：0.96' OLED(IIC bus) SSD1306
 
