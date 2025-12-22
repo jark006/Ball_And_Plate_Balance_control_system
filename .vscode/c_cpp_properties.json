@@ -1,0 +1,31 @@
+{
+    "configurations": [
+        {
+            "name": "STM32",
+            "includePath": [
+                "${workspaceFolder}/CORE",
+                "${workspaceFolder}/STM32F10x_FWLib/inc",
+                "${workspaceFolder}/USER",
+                "${workspaceFolder}/SYSTEM/delay",
+                "${workspaceFolder}/SYSTEM/uart",
+                "${workspaceFolder}/appcode"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "NVIC_PriorityGroup_2 0x500",
+                "uint64_t=unsigned long long",
+                "uint32_t=unsigned int",
+                "uint16_t=unsigned short",
+                "uint8_t=unsigned char"
+            ],
+            "windowsSdkVersion": "10.0.26100.0",
+            "compilerPath": "cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-msvc-arm"
+        }
+    ],
+    "version": 4
+}
