@@ -1,12 +1,11 @@
 /*******************************************************************************
-* 文件名: LobotServoController.h
+* 文件名: LobotSerialServo.h
 * 作者: 深圳乐幻索尔科技
 * 日期：20160806
-* LSC系列舵机控制板二次开发示例
 *******************************************************************************/
 
-#ifndef LOBOTSERVOCONTROLLER_H_
-#define LOBOTSERVOCONTROLLER_H_
+#ifndef LOBOTSERIALSERVO_H
+#define LOBOTSERIALSERVO_H
 
 #include "stm32f10x.h"
 
@@ -40,21 +39,13 @@
 #define LOBOT_SERVO_LED_ERROR_WRITE      35
 #define LOBOT_SERVO_LED_ERROR_READ       36
 
-#define LOBOT_DEBUG 1
-
 
 #define SetServo(a,b) LobotSerialServoMove(a, b, 40)
 #define ID1 1  //舵机ID
 #define ID2 2
 
-
-extern uint8_t LobotRxBuf[16];
-
-uint8_t LobotCheckSum(uint8_t buf[]);
 void LobotSerialServoSetID(uint8_t oldID, uint8_t newID);
 void LobotSerialServoMove(uint8_t id, int16_t position, uint16_t time);
 void LobotSerialServoUnload(uint8_t id);
 void LobotSerialServoLoad(uint8_t id);
-//int LobotSerialServoReadPosition(uint8_t id);
-//int LobotSerialMsgHandle(void);
 #endif

@@ -1,12 +1,7 @@
 #ifndef __SYS_H
-#define __SYS_H	
-#include "stm32f10x.h" 
-
-//0,不支持ucos
-//1,支持ucos
-#define SYSTEM_SUPPORT_UCOS		0		//定义系统文件夹是否支持UCOS
-																	    
-	 
+#define __SYS_H    
+#include "stm32f10x.h"                                                                         
+     
 //位带操作,实现51类似的GPIO控制功能
 //具体实现思想,参考<<CM3权威指南>>第五章(87页~92页).
 //IO口操作宏定义
@@ -52,11 +47,5 @@
 
 #define PGout(n)   BIT_ADDR(GPIOG_ODR_Addr,n)  //输出 
 #define PGin(n)    BIT_ADDR(GPIOG_IDR_Addr,n)  //输入
-
-
-
-void NVIC_Config(void);
-
-
 
 #endif

@@ -1,12 +1,9 @@
 /***********************************************************************************************************
- *
  *  2017全国大学生电子设计竞赛广东赛区
- *
  *  题目：滚球控制系统 （ B 题 ）
- *
  *  作者：陈思杰
- *
  ***********************************************************************************************************/
+
 #include "LobotSerialServo.h"
 #include "PID.h"
 #include "delay.h"
@@ -21,13 +18,14 @@
 #include "usart3.h"
 #include <stdio.h>
 #include <string.h>
+
 #define X_angle_up 700 // 舵机转角上下限
 #define X_angle_down 300
+
+void Funlist(void); // 功能项目列表
 void ShowBall(void);
 void SetPoint(void);
-void SetPID(void);
-void Pidtest(void);
-void Funlist(void);
+
 void Fun1(void);
 void Fun2(void);
 void Fun3(void);
@@ -36,11 +34,11 @@ void Fun5(void);
 void Fun6(void);
 void Fun7(void);
 void Fun8(void);
+
 // 初始化所有坐标
-Coordinate X = {0, 0, 0, 22, 66, 110, 22, 66, 110, 22, 66, 110, 0, 0, 0, 0},
-           Y = {0, 0, 0, 17, 17, 17, 62, 62, 62, 105, 105, 105, 0, 0, 0, 0};
-uint16_t i = 0;
-uint8_t mainItem = 0;
+Coordinate X = { 0, 0, 0, 22, 66, 110, 22, 66, 110, 22, 66, 110, 0, 0, 0, 0 };
+Coordinate Y = { 0, 0, 0, 17, 17, 17, 62, 62, 62, 105, 105, 105, 0, 0, 0, 0 };
+
 /***********************************************************************************************************
 主程序
 ***********************************************************************************************************/
@@ -49,104 +47,54 @@ int main(void) {
     delay_init(); // 延时初始化
     NVIC_PriorityGroupConfig(
         NVIC_PriorityGroup_2); // 设置NVIC中断分组2:2位抢占优先级，2位响应优先级
-    USART1_Config(115200); // 串口初始化为115200
-    USART2_Config(115200); // 串口初始化为115200
-    USART3_Config(115200); // 串口初始化为115200
+    USART1_Config(115200);     // 串口1 打印调试
+    USART2_Config(115200);     // 串口2 控制舵机
+    USART3_Config(115200);     // 串口3 接收OpenMV的小球位置
     Init_KEY();
     PID_init();
     OLED_Init();
     OLED_Clear();
-    TIM2_Init(600, 3600); // 定时30ms
+    TIM2_Init(300 - 1, 7200 - 1); // 定时30ms
+
     Funlist();
-    X.now = X.target = 63;
-    Y.now = Y.target = 60;
-    // ShowBall();
-    printf("START\r\n");
-    pidx.ActualValue = X.now;
-    pidy.ActualValue = Y.now;
-    pidx.SetValue = X.target;
-    pidy.SetValue = Y.target;
-    pidxv.SetValue = 0;
-    pidyv.SetValue = 0;
-    OLED_ShowString(10, 0, (u8 *)"ShowBall", 16);
-    OLED_ShowString(10, 2, (u8 *)"SetPoint", 16);
-    OLED_ShowString(10, 4, (u8 *)"SetPID", 16);
-    OLED_ShowString(10, 6, (u8 *)"Pidtest", 16);
-    OLED_ShowString(0, mainItem * 2, (u8 *)">", 16);
-    LobotSerialServoMove(ID1, 500, 500);
-    LobotSerialServoMove(ID2, 500, 500);
-    while (1) {
-        key_scan();
-        if (UP && (mainItem > 0)) {
-            mainItem--;
-            for (i = 0; i < 4; i++)
-                OLED_ShowString(0, i * 2, (u8 *)" ", 16);
-            OLED_ShowString(0, mainItem * 2, (u8 *)">", 16);
-        }
-        if (DOWN && (mainItem < 3)) {
-            mainItem++;
-            for (i = 0; i < 4; i++)
-                OLED_ShowString(0, i * 2, (u8 *)" ", 16);
-            OLED_ShowString(0, mainItem * 2, (u8 *)">", 16);
-        }
-        if (CONF) {
-            switch (mainItem) {
-            case 0:
-                ShowBall();
-                break;
-            case 1:
-                SetPoint();
-                break;
-            case 2:
-                SetPID();
-                break;
-            case 3:
-                Pidtest();
-                break;
-            default:
-                break;
-            }
-            OLED_ShowString(10, 0, (u8 *)"ShowBall", 16);
-            OLED_ShowString(10, 2, (u8 *)"SetPoint", 16);
-            OLED_ShowString(10, 4, (u8 *)"SetPID", 16);
-            OLED_ShowString(10, 6, (u8 *)"Pidtest", 16);
-            OLED_ShowString(0, mainItem * 2, (u8 *)">", 16);
-        }
-    }
+
+    return 0;
 }
-static u8 FunctionList[][20] = {
+
+static const char* const FunctionList[20] = {
     "ShowBall", "SetPoint", "Item 1  ", "Item 2  ", "Item 3  ",
     "Item 4  ", "More 1  ", "More 2  ", "More 3  ", "More 4  ",
-    " ",        " ",        " ",        " ",        " ",
-    " ",        " ",        " ",        " ",
+    "NULL    ", "NULL    ", "NULL    ", "NULL    ", "NULL    ", 
 };
+
 /***********************************************************************************************************
 ***********************************************************************************************************/
 void Funlist() {
-    u8 item = 0;
-    u8 ref_flag = 1;
-    LobotSerialServoMove(ID1, 500, 500);
-    LobotSerialServoMove(ID2, 500, 500);
+    u8 itemIdx = 0;
+    u8 isNeedRefresh = 1;
+
     OLED_Clear();
-    OLED_ShowString(10, 0, (u8 *)"Selet item", 16);
+    OLED_ShowString(10, 0, "Selet item", 16);
     LobotSerialServoMove(ID1, 500, 500);
     LobotSerialServoMove(ID2, 500, 500);
+    delay_ms(500);
+
     while (1) {
         key_scan();
-        if ((UP || LEFT) && item > 0) {
-            item--;
-            ref_flag = 1;
+        if ((UP || LEFT) && itemIdx > 0) {
+            itemIdx--;
+            isNeedRefresh = 1;
         }
-        if ((DOWN || RIGHT) && item < 10) {
-            item++;
-            ref_flag = 1;
+        if ((DOWN || RIGHT) && itemIdx < 10) {
+            itemIdx++;
+            isNeedRefresh = 1;
         }
-        if (ref_flag == 1) {
-            ref_flag = 0;
-            OLED_ShowString(10, 4, FunctionList[item], 16);
+        if (isNeedRefresh) {
+            isNeedRefresh = 0;
+            OLED_ShowString(10, 4, FunctionList[itemIdx], 16);
         }
         if (CONF) {
-            switch (item) {
+            switch (itemIdx) {
             case 0:
                 ShowBall();
                 break;
@@ -180,18 +128,16 @@ void Funlist() {
             default:
                 break;
             }
-            ref_flag = 1;
-            OLED_ShowString(10, 0, (u8 *)"Selet item", 16);
+            isNeedRefresh = 1;
+            OLED_ShowString(10, 0, "Selet item", 16);
         }
     }
 }
+
 /***********************************************************************************************************
 基础项目：1
 ***********************************************************************************************************/
 void Fun1() {
-    OLED_Clear();
-    OLED_ShowString(0, 0, (u8 *)"Item 1", 16);
-    OLED_ShowString(0, 2, (u8 *)"stay on 2 in 5s.", 16);
     PID_init();
     X.target = X.p2;
     Y.target = Y.p2;
@@ -199,6 +145,11 @@ void Fun1() {
     pidy.SetValue = Y.target;
     X.speed = 0;
     Y.speed = 0;
+
+    OLED_Clear();
+    OLED_ShowString(0, 0, "Item 1", 16);
+    OLED_ShowString(0, 2, "stay on 2 in 5s.", 16);
+
     while (1) {
         key_scan();
         if (CONF) {
@@ -206,8 +157,8 @@ void Fun1() {
                 key_scan();
                 pidx.ActualValue = X.now;
                 pidy.ActualValue = Y.now;
-                X.angle = (int)PID_realize(&pidx);
-                Y.angle = (int)PID_realize(&pidy);
+                X.angle = PID_realize(&pidx);
+                Y.angle = PID_realize(&pidy);
                 X.anglewrite = 500 + (X.speed * 60) - X.angle;
                 Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
                 if (X.anglewrite > X_angle_up)
@@ -234,14 +185,13 @@ void Fun1() {
     LobotSerialServoMove(ID1, 500, 500);
     LobotSerialServoMove(ID2, 500, 500);
 }
+
 /***********************************************************************************************************
 基础项目：2
 ***********************************************************************************************************/
 void Fun2() {
     int Xsp, Ysp;
-    OLED_Clear();
-    OLED_ShowString(0, 0, (u8 *)"Item 2", 16);
-    OLED_ShowString(0, 2, (u8 *)"Move from 1 to 5", 16);
+
     PID_init();
     X.target = X.p5;
     Y.target = Y.p5;
@@ -250,13 +200,18 @@ void Fun2() {
     pidx.Ki = pidy.Ki = 0.0035;
     X.speed = 0;
     Y.speed = 0;
+
+    OLED_Clear();
+    OLED_ShowString(0, 0, "Item 2", 16);
+    OLED_ShowString(0, 2, "Move from 1 to 5", 16);
+
     while (1) {
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
-        // printf("Xspeed:%d Yspeed:%d\r\n",X.speed,Y.speed);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
+
         if (abs(X.speed) < 3)
             Xsp = X.speed * 60;
         else
@@ -285,15 +240,13 @@ void Fun2() {
     LobotSerialServoMove(ID1, 500, 500);
     LobotSerialServoMove(ID2, 500, 500);
 }
+
 /***********************************************************************************************************
 基础项目：3
 ***********************************************************************************************************/
 void Fun3() {
     uint32_t time_count = 0;
-    OLED_Clear();
-    OLED_ShowString(0, 0, (u8 *)"Item 3", 16);
-    OLED_ShowString(0, 2, (u8 *)"Move from 1 to 4,stay 2s", 16);
-    OLED_ShowString(0, 4, (u8 *)"then 4 to 5", 16);
+
     PID_init();
     X.now = X.target = X.p4;
     Y.now = Y.target = Y.p4;
@@ -301,7 +254,13 @@ void Fun3() {
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
-    OLED_ShowString(30, 6, (u8 *)"Part 1", 16);
+
+    OLED_Clear();
+    OLED_ShowString(0, 0, "Item 3", 16);
+    OLED_ShowString(0, 2, "Move from 1 to 4,stay 2s", 16);
+    OLED_ShowString(0, 4, "then 4 to 5", 16);
+
+    OLED_ShowString(30, 6, "Part 1", 16);
     while (1) {
         time_count++;
         if (time_count == 1000)
@@ -309,8 +268,8 @@ void Fun3() {
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 95) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 95) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -330,7 +289,8 @@ void Fun3() {
             break;
         }
     }
-    OLED_ShowString(30, 6, (u8 *)"Part 2", 16);
+
+    OLED_ShowString(30, 6, "Part 2", 16);
     PID_init();
     X.now = X.target = X.p5;
     Y.now = Y.target = Y.p5;
@@ -339,6 +299,7 @@ void Fun3() {
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
     time_count = 0;
+
     while (1) {
         time_count++;
         if (time_count == 700)
@@ -346,8 +307,8 @@ void Fun3() {
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 90) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 90) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -368,15 +329,13 @@ void Fun3() {
     LobotSerialServoMove(ID1, 500, 500);
     LobotSerialServoMove(ID2, 500, 500);
 }
+
 /***********************************************************************************************************
 基础项目：4
 ***********************************************************************************************************/
 void Fun4() {
     uint32_t time_count = 0;
-    OLED_Clear();
-    OLED_ShowString(0, 0, (u8 *)"Item 4", 16);
-    OLED_ShowString(0, 2, (u8 *)"Move from 1 to 9,stay 2s", 16);
-    // OLED_ShowString(0,4,(u8*)"then 4 to 5",16);
+
     PID_init();
     X.now = X.target = X.p5;
     Y.now = Y.target = Y.p5;
@@ -384,14 +343,19 @@ void Fun4() {
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
-    OLED_ShowString(30, 6, (u8 *)"Part 1", 16);
+
+    OLED_Clear();
+    OLED_ShowString(0, 0, "Item 4", 16);
+    OLED_ShowString(0, 2, "Move from 1 to 9,stay 2s", 16);
+
+    OLED_ShowString(30, 6, "Part 1", 16);
     while (1) {
         time_count++;
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -411,7 +375,8 @@ void Fun4() {
             break;
         }
     }
-    OLED_ShowString(30, 6, (u8 *)"Part 2", 16);
+
+    OLED_ShowString(30, 6, "Part 2", 16);
     PID_init();
     X.now = X.target = 75;
     Y.now = Y.target = 75;
@@ -425,8 +390,8 @@ void Fun4() {
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -446,7 +411,8 @@ void Fun4() {
             break;
         }
     }
-    OLED_ShowString(30, 6, (u8 *)"Part 3", 16);
+
+    OLED_ShowString(30, 6, "Part 3", 16);
     PID_init();
     X.now = X.target = 85;
     Y.now = Y.target = 85;
@@ -460,8 +426,8 @@ void Fun4() {
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 75) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 70) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -481,7 +447,8 @@ void Fun4() {
             break;
         }
     }
-    OLED_ShowString(30, 6, (u8 *)"Part 4", 16);
+
+    OLED_ShowString(30, 6, "Part 4", 16);
     PID_init();
     X.now = X.target = X.p9;
     Y.now = Y.target = Y.p9;
@@ -493,8 +460,8 @@ void Fun4() {
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 80) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -515,16 +482,17 @@ void Fun4() {
     LobotSerialServoMove(ID1, 500, 500);
     LobotSerialServoMove(ID2, 500, 500);
 }
+
 /***********************************************************************************************************
 发挥项目：1
 ***********************************************************************************************************/
 void Fun5() {
     uint32_t time_count = 0;
     OLED_Clear();
-    OLED_ShowString(0, 0, (u8 *)"More 1", 16);
-    OLED_ShowString(0, 2, (u8 *)"Move by points", 16);
-    OLED_ShowString(0, 4, (u8 *)"1 > 2 > 6 > 9 ", 16);
-    // OLED_ShowString(0,4,(u8*)"then 4 to 5",16);
+    OLED_ShowString(0, 0, "More 1", 16);
+    OLED_ShowString(0, 2, "Move by points", 16);
+    OLED_ShowString(0, 4, "1 > 2 > 6 > 9 ", 16);
+
     PID_init();
     X.now = X.target = X.p2;
     Y.now = Y.target = Y.p2 + 5;
@@ -532,14 +500,15 @@ void Fun5() {
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
-    OLED_ShowString(30, 6, (u8 *)"Part 1", 16);
+
+    OLED_ShowString(30, 6, "Part 1", 16);
     while (1) {
         time_count++;
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -559,7 +528,8 @@ void Fun5() {
             break;
         }
     }
-    OLED_ShowString(30, 6, (u8 *)"Part 2", 16);
+
+    OLED_ShowString(30, 6, "Part 2", 16);
     PID_init();
     X.now = X.target = (X.p2 + X.p6) / 2;
     Y.now = Y.target = (Y.p2 + Y.p6) / 2;
@@ -568,13 +538,14 @@ void Fun5() {
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
     time_count = 0;
+
     while (1) {
         time_count++;
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -594,7 +565,8 @@ void Fun5() {
             break;
         }
     }
-    OLED_ShowString(30, 6, (u8 *)"Part 3", 16);
+
+    OLED_ShowString(30, 6, "Part 3", 16);
     PID_init();
     X.now = X.target = X.p6 - 5;
     Y.now = Y.target = Y.p6 + 5;
@@ -603,13 +575,14 @@ void Fun5() {
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
     time_count = 0;
+
     while (1) {
         time_count++;
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -629,7 +602,8 @@ void Fun5() {
             break;
         }
     }
-    OLED_ShowString(30, 6, (u8 *)"Part 4", 16);
+
+    OLED_ShowString(30, 6, "Part 4", 16);
     PID_init();
     X.now = X.target = (X.p9 + X.p6) / 2;
     Y.now = Y.target = (Y.p9 + Y.p6) / 2;
@@ -638,13 +612,14 @@ void Fun5() {
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
     time_count = 0;
+
     while (1) {
         time_count++;
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -664,7 +639,8 @@ void Fun5() {
             break;
         }
     }
-    OLED_ShowString(30, 6, (u8 *)"Part 5", 16);
+
+    OLED_ShowString(30, 6, "Part 5", 16);
     PID_init();
     X.now = X.target = X.p9;
     Y.now = Y.target = Y.p9;
@@ -672,12 +648,13 @@ void Fun5() {
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
+
     while (1) {
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 70) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 70) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -698,16 +675,19 @@ void Fun5() {
     LobotSerialServoMove(ID1, 500, 500);
     LobotSerialServoMove(ID2, 500, 500);
 }
+
 /***********************************************************************************************************
 发挥项目：2
 ***********************************************************************************************************/
 void Fun6() {
     uint32_t time_count = 0;
+
     OLED_Clear();
-    OLED_ShowString(0, 0, (u8 *)"More 2", 16);
-    OLED_ShowString(0, 2, (u8 *)"Move by points", 16);
-    OLED_ShowString(0, 4, (u8 *)"A > B > C > D ", 16);
-    OLED_ShowString(30, 6, (u8 *)"Part 2", 16);
+    OLED_ShowString(0, 0, "More 2", 16);
+    OLED_ShowString(0, 2, "Move by points", 16);
+    OLED_ShowString(0, 4, "A > B > C > D ", 16);
+    OLED_ShowString(30, 6, "Part 2", 16);
+
     PID_init();
     X.now = X.target = (X.p2 + X.p1) / 2;
     Y.now = Y.target = (Y.p2 + Y.p1) / 2;
@@ -716,13 +696,14 @@ void Fun6() {
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
     time_count = 0;
+
     while (1) {
         time_count++;
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -742,6 +723,8 @@ void Fun6() {
             break;
         }
     }
+
+    OLED_ShowString(30, 6, "Part 1", 16);
     PID_init();
     X.now = X.target = X.p2;
     Y.now = Y.target = Y.p2;
@@ -749,14 +732,14 @@ void Fun6() {
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
-    OLED_ShowString(30, 6, (u8 *)"Part 1", 16);
+
     while (1) {
         time_count++;
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -776,7 +759,8 @@ void Fun6() {
             break;
         }
     }
-    OLED_ShowString(30, 6, (u8 *)"Part 2", 16);
+
+    OLED_ShowString(30, 6, "Part 2", 16);
     PID_init();
     X.now = X.target = (X.p2 + X.p6) / 2;
     Y.now = Y.target = (Y.p2 + Y.p6) / 2;
@@ -785,13 +769,14 @@ void Fun6() {
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
     time_count = 0;
+
     while (1) {
         time_count++;
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -811,7 +796,8 @@ void Fun6() {
             break;
         }
     }
-    OLED_ShowString(30, 6, (u8 *)"Part 3", 16);
+
+    OLED_ShowString(30, 6, "Part 3", 16);
     PID_init();
     X.now = X.target = X.p6;
     Y.now = Y.target = Y.p6;
@@ -820,13 +806,14 @@ void Fun6() {
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
     time_count = 0;
+
     while (1) {
         time_count++;
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 80) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -846,7 +833,8 @@ void Fun6() {
             break;
         }
     }
-    OLED_ShowString(30, 6, (u8 *)"Part 4", 16);
+
+    OLED_ShowString(30, 6, "Part 4", 16);
     PID_init();
     X.now = X.target = (X.p9 + X.p6) / 2;
     Y.now = Y.target = (Y.p9 + Y.p6) / 2;
@@ -855,13 +843,14 @@ void Fun6() {
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
     time_count = 0;
+
     while (1) {
         time_count++;
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 80) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -881,7 +870,8 @@ void Fun6() {
             break;
         }
     }
-    OLED_ShowString(30, 6, (u8 *)"Part 5", 16);
+
+    OLED_ShowString(30, 6, "Part 5", 16);
     PID_init();
     X.now = X.target = X.p9;
     Y.now = Y.target = Y.p9;
@@ -889,12 +879,13 @@ void Fun6() {
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
+
     while (1) {
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 75) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 75) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -915,18 +906,18 @@ void Fun6() {
     LobotSerialServoMove(ID1, 500, 500);
     LobotSerialServoMove(ID2, 500, 500);
 }
+
 /***********************************************************************************************************
 发挥项目：3
 ***********************************************************************************************************/
 void Fun7() {
-    //    int Xsp,Ysp;
     int time_count = 0;
     int cc = 3;
     OLED_Clear();
-    OLED_ShowString(0, 0, (u8 *)"more 3", 16);
-    OLED_ShowString(0, 2, (u8 *)"Move soround 5", 16);
-    OLED_ShowString(30, 6, (u8 *)"Part 2", 16);
-    //*****************************************************************************
+    OLED_ShowString(0, 0, "more 3", 16);
+    OLED_ShowString(0, 2, "Move soround 5", 16);
+    OLED_ShowString(30, 6, "Part 2", 16);
+    
     while (cc--) {
         PID_init();
         X.now = X.target = X.p5 + 8;
@@ -936,13 +927,14 @@ void Fun7() {
         pidx.SetValue = X.target;
         pidy.SetValue = Y.target;
         time_count = 0;
+
         while (1) {
             time_count++;
             key_scan();
             pidx.ActualValue = X.now;
             pidy.ActualValue = Y.now;
-            X.angle = (int)PID_realize(&pidx);
-            Y.angle = (int)PID_realize(&pidy);
+            X.angle = PID_realize(&pidx);
+            Y.angle = PID_realize(&pidy);
             X.anglewrite = 500 + (X.speed * 60) - X.angle;
             Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
             if (X.anglewrite > X_angle_up)
@@ -962,6 +954,8 @@ void Fun7() {
                 break;
             }
         }
+
+        OLED_ShowString(30, 6, "Part 1", 16);
         PID_init();
         X.now = X.target = X.p5 + 8;
         Y.now = Y.target = Y.p5;
@@ -969,14 +963,13 @@ void Fun7() {
         pidy.ActualValue = Y.now;
         pidx.SetValue = X.target;
         pidy.SetValue = Y.target;
-        OLED_ShowString(30, 6, (u8 *)"Part 1", 16);
         while (1) {
             time_count++;
             key_scan();
             pidx.ActualValue = X.now;
             pidy.ActualValue = Y.now;
-            X.angle = (int)PID_realize(&pidx);
-            Y.angle = (int)PID_realize(&pidy);
+            X.angle = PID_realize(&pidx);
+            Y.angle = PID_realize(&pidy);
             X.anglewrite = 500 + (X.speed * 60) - X.angle;
             Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
             if (X.anglewrite > X_angle_up)
@@ -996,7 +989,8 @@ void Fun7() {
                 break;
             }
         }
-        OLED_ShowString(30, 6, (u8 *)"Part 2", 16);
+
+        OLED_ShowString(30, 6, "Part 2", 16);
         PID_init();
         X.now = X.target = X.p5;
         Y.now = Y.target = Y.p5 - 8;
@@ -1010,8 +1004,8 @@ void Fun7() {
             key_scan();
             pidx.ActualValue = X.now;
             pidy.ActualValue = Y.now;
-            X.angle = (int)PID_realize(&pidx);
-            Y.angle = (int)PID_realize(&pidy);
+            X.angle = PID_realize(&pidx);
+            Y.angle = PID_realize(&pidy);
             X.anglewrite = 500 + (X.speed * 60) - X.angle;
             Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
             if (X.anglewrite > X_angle_up)
@@ -1031,7 +1025,7 @@ void Fun7() {
                 break;
             }
         }
-        OLED_ShowString(30, 6, (u8 *)"Part 3", 16);
+        OLED_ShowString(30, 6, "Part 3", 16);
         PID_init();
         X.now = X.target = X.p5 - 8;
         Y.now = Y.target = Y.p5;
@@ -1045,8 +1039,8 @@ void Fun7() {
             key_scan();
             pidx.ActualValue = X.now;
             pidy.ActualValue = Y.now;
-            X.angle = (int)PID_realize(&pidx);
-            Y.angle = (int)PID_realize(&pidy);
+            X.angle = PID_realize(&pidx);
+            Y.angle = PID_realize(&pidy);
             X.anglewrite = 500 + (X.speed * 80) - X.angle;
             Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
             if (X.anglewrite > X_angle_up)
@@ -1067,8 +1061,8 @@ void Fun7() {
             }
         }
     }
-    //*****************************************************************************
-    OLED_ShowString(30, 6, (u8 *)"Part 5", 16);
+    
+    OLED_ShowString(30, 6, "Part 5", 16);
     PID_init();
     X.now = X.target = X.p9;
     Y.now = Y.target = Y.p9;
@@ -1076,12 +1070,13 @@ void Fun7() {
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
+
     while (1) {
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 75) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 75) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -1099,16 +1094,16 @@ void Fun7() {
             break;
         }
     }
-    //*****************************************************************************
     LobotSerialServoMove(ID1, 500, 500);
     LobotSerialServoMove(ID2, 500, 500);
 }
+
 void gg() {
     uint32_t time_count = 0;
     OLED_Clear();
-    OLED_ShowString(0, 0, (u8 *)"More 1", 16);
-    OLED_ShowString(0, 2, (u8 *)"Move by points", 16);
-    OLED_ShowString(0, 2, (u8 *)"A > B > C > D", 16);
+    OLED_ShowString(0, 0, "More 1", 16);
+    OLED_ShowString(0, 2, "Move by points", 16);
+    OLED_ShowString(0, 2, "A > B > C > D", 16);
     PID_init();
     X.now = X.target = X.p2;
     Y.now = Y.target = Y.p2;
@@ -1116,14 +1111,14 @@ void gg() {
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
-    OLED_ShowString(30, 6, (u8 *)"Part 1", 16);
+    OLED_ShowString(30, 6, "Part 1", 16);
     while (1) {
         time_count++;
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -1143,7 +1138,7 @@ void gg() {
             break;
         }
     }
-    OLED_ShowString(30, 6, (u8 *)"Part 2", 16);
+    OLED_ShowString(30, 6, "Part 2", 16);
     PID_init();
     X.now = X.target = (X.p2 + X.p6) / 2;
     Y.now = Y.target = (Y.p2 + Y.p6) / 2;
@@ -1157,8 +1152,8 @@ void gg() {
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -1178,7 +1173,7 @@ void gg() {
             break;
         }
     }
-    OLED_ShowString(30, 6, (u8 *)"Part 3", 16);
+    OLED_ShowString(30, 6, "Part 3", 16);
     PID_init();
     X.now = X.target = X.p6;
     Y.now = Y.target = Y.p6;
@@ -1192,8 +1187,8 @@ void gg() {
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 80) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -1213,7 +1208,7 @@ void gg() {
             break;
         }
     }
-    OLED_ShowString(30, 6, (u8 *)"Part 4", 16);
+    OLED_ShowString(30, 6, "Part 4", 16);
     PID_init();
     X.now = X.target = (X.p9 + X.p6) / 2;
     Y.now = Y.target = (Y.p9 + Y.p6) / 2;
@@ -1227,8 +1222,8 @@ void gg() {
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 80) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -1249,7 +1244,7 @@ void gg() {
         }
     }
     //*****************************************************************************
-    OLED_ShowString(30, 6, (u8 *)"Part 5", 16);
+    OLED_ShowString(30, 6, "Part 5", 16);
     PID_init();
     X.now = X.target = X.p9;
     Y.now = Y.target = Y.p9;
@@ -1261,8 +1256,8 @@ void gg() {
         key_scan();
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
+        X.angle = PID_realize(&pidx);
+        Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 75) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 75) - Y.angle;
         if (X.anglewrite > X_angle_up)
@@ -1283,12 +1278,14 @@ void gg() {
     LobotSerialServoMove(ID1, 500, 500);
     LobotSerialServoMove(ID2, 500, 500);
 }
+
+
 /***********************************************************************************************************
 发挥项目：4
 ***********************************************************************************************************/
 void Fun8() {
     OLED_Clear();
-    OLED_ShowString(0, 2, (u8 *)"stay on 2 in 5s.", 16);
+    OLED_ShowString(0, 2, "stay on 2 in 5s.", 16);
     PID_init();
     X.now = X.target = 63;
     Y.now = Y.target = 60;
@@ -1304,65 +1301,12 @@ void Fun8() {
         }
     }
 }
-/***********************************************************************************************************
-PID测试
-***********************************************************************************************************/
-void Pidtest() {
-    //	int X_diff,Y_diff;
-    OLED_Clear();
-    OLED_ShowString(80, 0, (u8 *)"X   Y", 16);
-    OLED_ShowString(0, 2, (u8 *)" Now", 16);
-    OLED_ShowString(0, 4, (u8 *)"speed", 16);
-    OLED_ShowString(0, 6, (u8 *)"AngleWrt", 16);
-    while (1) {
-        key_scan();
-        //		if(UP)
-        //			X.now ++;
-        //		if(DOWN)
-        //			X.now --;
-        //		if(RIGHT)
-        //			Y.now ++;
-        //		if(LEFT)
-        //			Y.now --;
-        pidx.ActualValue = X.now;
-        pidy.ActualValue = Y.now;
-        X.angle = (int)PID_realize(&pidx);
-        Y.angle = (int)PID_realize(&pidy);
-        //		X.speedfb = (int)PID_realize(&pidxv);
-        //		Y.speedfb = (int)PID_realize(&pidyv);
-        //		X_diff = X.now - X.target;
-        //		Y_diff = Y.now - Y.target;
-        X.anglewrite = 500 + (X.speed * 60) - X.angle;
-        Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-        //		X.anglewrite = 500  + X.speed * 80;
-        //		Y.anglewrite = 500  + Y.speed * 80;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
-        //		OLED_ShowNum( 72,2,X.now,3,16);
-        //		OLED_ShowNum( 72,4,X.speed,3,16);
-        //		OLED_ShowNum( 72,6,X.anglewrite,3,16);
-        //		OLED_ShowNum(104,2,Y.now,3,16);
-        //		OLED_ShowNum(104,4,Y.speed,3,16);
-        //		OLED_ShowNum(104,6,Y.anglewrite,3,16);
-        if (EXIT) {
-            OLED_Clear();
-            break;
-        }
-    }
-}
+
 void ShowBall() {
     OLED_Clear();
-    OLED_ShowString(0, 0, (u8 *)"====ShowBall====", 16);
-    OLED_ShowString(0, 2, (u8 *)" X:", 16);
-    OLED_ShowString(0, 4, (u8 *)" Y:", 16);
+    OLED_ShowString(0, 0, "====ShowBall====", 16);
+    OLED_ShowString(0, 2, " X:", 16);
+    OLED_ShowString(0, 4, " Y:", 16);
     while (1) {
         key_scan();
         if (F1) {
@@ -1381,13 +1325,14 @@ void ShowBall() {
         }
     }
 }
+
 void SetPoint() {
     uint8_t pointItem = 1;
     OLED_Clear();
-    OLED_ShowString(0, 0, (u8 *)"====SetPoint====", 16);
-    OLED_ShowString(0, 2, (u8 *)"Set:     X   Y", 16);
-    OLED_ShowString(0, 4, (u8 *)"Value", 16);
-    OLED_ShowString(0, 6, (u8 *)"Ball", 16);
+    OLED_ShowString(0, 0, "====SetPoint====", 16);
+    OLED_ShowString(0, 2, "Set:     X   Y", 16);
+    OLED_ShowString(0, 4, "Value", 16);
+    OLED_ShowString(0, 6, "Ball", 16);
     while (1) {
         key_scan();
         OLED_ShowNum(40, 6, X.now, 5, 16);
@@ -1398,47 +1343,47 @@ void SetPoint() {
             pointItem++;
         switch (pointItem) {
         case 1:
-            OLED_ShowString(32, 2, (u8 *)"P1", 16);
+            OLED_ShowString(32, 2, "P1", 16);
             OLED_ShowNum(40, 4, X.p1, 5, 16);
             OLED_ShowNum(88, 4, Y.p1, 5, 16);
             break;
         case 2:
-            OLED_ShowString(32, 2, (u8 *)"P2", 16);
+            OLED_ShowString(32, 2, "P2", 16);
             OLED_ShowNum(40, 4, X.p2, 5, 16);
             OLED_ShowNum(88, 4, Y.p2, 5, 16);
             break;
         case 3:
-            OLED_ShowString(32, 2, (u8 *)"P3", 16);
+            OLED_ShowString(32, 2, "P3", 16);
             OLED_ShowNum(40, 4, X.p3, 5, 16);
             OLED_ShowNum(88, 4, Y.p3, 5, 16);
             break;
         case 4:
-            OLED_ShowString(32, 2, (u8 *)"P4", 16);
+            OLED_ShowString(32, 2, "P4", 16);
             OLED_ShowNum(40, 4, X.p4, 5, 16);
             OLED_ShowNum(88, 4, Y.p4, 5, 16);
             break;
         case 5:
-            OLED_ShowString(32, 2, (u8 *)"P5", 16);
+            OLED_ShowString(32, 2, "P5", 16);
             OLED_ShowNum(40, 4, X.p5, 5, 16);
             OLED_ShowNum(88, 4, Y.p5, 5, 16);
             break;
         case 6:
-            OLED_ShowString(32, 2, (u8 *)"P6", 16);
+            OLED_ShowString(32, 2, "P6", 16);
             OLED_ShowNum(40, 4, X.p6, 5, 16);
             OLED_ShowNum(88, 4, Y.p6, 5, 16);
             break;
         case 7:
-            OLED_ShowString(32, 2, (u8 *)"P7", 16);
+            OLED_ShowString(32, 2, "P7", 16);
             OLED_ShowNum(40, 4, X.p7, 5, 16);
             OLED_ShowNum(88, 4, Y.p7, 5, 16);
             break;
         case 8:
-            OLED_ShowString(32, 2, (u8 *)"P8", 16);
+            OLED_ShowString(32, 2, "P8", 16);
             OLED_ShowNum(40, 4, X.p8, 5, 16);
             OLED_ShowNum(88, 4, Y.p8, 5, 16);
             break;
         case 9:
-            OLED_ShowString(32, 2, (u8 *)"P9", 16);
+            OLED_ShowString(32, 2, "P9", 16);
             OLED_ShowNum(40, 4, X.p9, 5, 16);
             OLED_ShowNum(88, 4, Y.p9, 5, 16);
             break;
@@ -1487,27 +1432,6 @@ void SetPoint() {
                 break;
             }
         }
-        if (EXIT) {
-            OLED_Clear();
-            break;
-        }
-    }
-}
-void SetPID() {
-    OLED_Clear();
-    OLED_ShowString(0, 0, (u8 *)"=====SetPID=====", 16);
-    while (1) {
-        key_scan();
-        if (UP)
-            X.now += 10;
-        if (DOWN)
-            X.now -= 10;
-        if (RIGHT)
-            X.now++;
-        if (LEFT)
-            X.now--;
-        OLED_ShowNum(40, 4, X.now, 5, 16);
-        OLED_ShowNum(88, 4, Y.now, 5, 16);
         if (EXIT) {
             OLED_Clear();
             break;
