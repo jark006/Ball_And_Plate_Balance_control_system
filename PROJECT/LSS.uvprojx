@@ -535,14 +535,14 @@
           <GroupName>APPcode</GroupName>
           <Files>
             <File>
-              <FileName>LobotSerialServo.c</FileName>
+              <FileName>servo.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\appcode\LobotSerialServo.c</FilePath>
+              <FilePath>..\appcode\servo.c</FilePath>
             </File>
             <File>
-              <FileName>PID.c</FileName>
+              <FileName>pid.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\appcode\PID.c</FilePath>
+              <FilePath>..\appcode\pid.c</FilePath>
             </File>
             <File>
               <FileName>led.c</FileName>

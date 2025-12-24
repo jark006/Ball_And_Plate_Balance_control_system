@@ -2,7 +2,7 @@
 ¶æ»ú¿ØÖÆ³ÌÐò
 *******************************************************************************/
 
-#include "LobotSerialServo.h"
+#include "servo.h"
 #include "stm32f10x.h"
 #include "usart1.h"
 #include <stdarg.h>

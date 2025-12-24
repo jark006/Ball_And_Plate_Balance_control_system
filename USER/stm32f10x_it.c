@@ -23,7 +23,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "PID.h"
+#include "pid.h"
 #include "stdio.h"
 #include "usart1.h"
 #include "usart2.h"

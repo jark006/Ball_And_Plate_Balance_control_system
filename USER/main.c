@@ -4,8 +4,8 @@
  *  作者：陈思杰
  ***********************************************************************************************************/
 
-#include "LobotSerialServo.h"
-#include "PID.h"
+#include "servo.h"
+#include "pid.h"
 #include "delay.h"
 #include "key.h"
 #include "led.h"
@@ -19,8 +19,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#define X_angle_up 700 // 舵机转角上下限
-#define X_angle_down 300
+#define ANGLE_MAX 700 // 舵机最大转角
+#define ANGLE_MIN 300 // 舵机最小转角
 
 void Funlist(void); // 功能项目列表
 void ShowBall(void);
@@ -64,7 +64,7 @@ int main(void) {
 static const char* const FunctionList[20] = {
     "ShowBall", "SetPoint", "Item 1  ", "Item 2  ", "Item 3  ",
     "Item 4  ", "More 1  ", "More 2  ", "More 3  ", "More 4  ",
-    "NULL    ", "NULL    ", "NULL    ", "NULL    ", "NULL    ", 
+    "NULL    ", "NULL    ", "NULL    ", "NULL    ", "NULL    ",
 };
 
 /***********************************************************************************************************
@@ -134,6 +134,19 @@ void Funlist() {
     }
 }
 
+// 限制舵机转角在合理范围内
+void limitServoAngle() {
+    if (X.anglewrite > ANGLE_MAX)
+        X.anglewrite = ANGLE_MAX;
+    else if (X.anglewrite < ANGLE_MIN)
+        X.anglewrite = ANGLE_MIN;
+
+    if (Y.anglewrite > ANGLE_MAX)
+        Y.anglewrite = ANGLE_MAX;
+    else if (Y.anglewrite < ANGLE_MIN)
+        Y.anglewrite = ANGLE_MIN;
+}
+
 /***********************************************************************************************************
 基础项目：1
 ***********************************************************************************************************/
@@ -161,14 +174,7 @@ void Fun1() {
                 Y.angle = PID_realize(&pidy);
                 X.anglewrite = 500 + (X.speed * 60) - X.angle;
                 Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-                if (X.anglewrite > X_angle_up)
-                    X.anglewrite = X_angle_up;
-                if (X.anglewrite < X_angle_down)
-                    X.anglewrite = X_angle_down;
-                if (Y.anglewrite > X_angle_up)
-                    Y.anglewrite = X_angle_up;
-                if (Y.anglewrite < X_angle_down)
-                    Y.anglewrite = X_angle_down;
+                limitServoAngle();
                 SetServo(ID1, X.anglewrite);
                 SetServo(ID2, Y.anglewrite);
                 if (EXIT) {
@@ -222,14 +228,7 @@ void Fun2() {
             Ysp = Y.speed * 85;
         X.anglewrite = 500 + Xsp - X.angle;
         Y.anglewrite = 500 + Ysp - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (EXIT) {
@@ -272,14 +271,7 @@ void Fun3() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 95) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 95) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 5000)
@@ -311,14 +303,7 @@ void Fun3() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 90) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 90) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (EXIT) {
@@ -358,14 +343,7 @@ void Fun4() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 1500)
@@ -394,14 +372,7 @@ void Fun4() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 1500)
@@ -430,14 +401,7 @@ void Fun4() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 75) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 70) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 1500)
@@ -464,14 +428,7 @@ void Fun4() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 80) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (EXIT) {
@@ -511,14 +468,7 @@ void Fun5() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 2500)
@@ -548,14 +498,7 @@ void Fun5() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 2500)
@@ -585,14 +528,7 @@ void Fun5() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 3000)
@@ -622,14 +558,7 @@ void Fun5() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 2500)
@@ -657,14 +586,7 @@ void Fun5() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 70) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 70) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (EXIT) {
@@ -706,14 +628,7 @@ void Fun6() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 2500)
@@ -742,14 +657,7 @@ void Fun6() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 2500)
@@ -779,14 +687,7 @@ void Fun6() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 2500)
@@ -816,14 +717,7 @@ void Fun6() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 80) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 3000)
@@ -853,14 +747,7 @@ void Fun6() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 80) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 2500)
@@ -888,14 +775,7 @@ void Fun6() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 75) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 75) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (EXIT) {
@@ -917,7 +797,7 @@ void Fun7() {
     OLED_ShowString(0, 0, "more 3", 16);
     OLED_ShowString(0, 2, "Move soround 5", 16);
     OLED_ShowString(30, 6, "Part 2", 16);
-    
+
     while (cc--) {
         PID_init();
         X.now = X.target = X.p5 + 8;
@@ -937,14 +817,7 @@ void Fun7() {
             Y.angle = PID_realize(&pidy);
             X.anglewrite = 500 + (X.speed * 60) - X.angle;
             Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-            if (X.anglewrite > X_angle_up)
-                X.anglewrite = X_angle_up;
-            if (X.anglewrite < X_angle_down)
-                X.anglewrite = X_angle_down;
-            if (Y.anglewrite > X_angle_up)
-                Y.anglewrite = X_angle_up;
-            if (Y.anglewrite < X_angle_down)
-                Y.anglewrite = X_angle_down;
+            limitServoAngle();
             SetServo(ID1, X.anglewrite);
             SetServo(ID2, Y.anglewrite);
             if (time_count > 2500)
@@ -972,14 +845,7 @@ void Fun7() {
             Y.angle = PID_realize(&pidy);
             X.anglewrite = 500 + (X.speed * 60) - X.angle;
             Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-            if (X.anglewrite > X_angle_up)
-                X.anglewrite = X_angle_up;
-            if (X.anglewrite < X_angle_down)
-                X.anglewrite = X_angle_down;
-            if (Y.anglewrite > X_angle_up)
-                Y.anglewrite = X_angle_up;
-            if (Y.anglewrite < X_angle_down)
-                Y.anglewrite = X_angle_down;
+            limitServoAngle();
             SetServo(ID1, X.anglewrite);
             SetServo(ID2, Y.anglewrite);
             if (time_count > 2500)
@@ -1008,14 +874,7 @@ void Fun7() {
             Y.angle = PID_realize(&pidy);
             X.anglewrite = 500 + (X.speed * 60) - X.angle;
             Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-            if (X.anglewrite > X_angle_up)
-                X.anglewrite = X_angle_up;
-            if (X.anglewrite < X_angle_down)
-                X.anglewrite = X_angle_down;
-            if (Y.anglewrite > X_angle_up)
-                Y.anglewrite = X_angle_up;
-            if (Y.anglewrite < X_angle_down)
-                Y.anglewrite = X_angle_down;
+            limitServoAngle();
             SetServo(ID1, X.anglewrite);
             SetServo(ID2, Y.anglewrite);
             if (time_count > 2500)
@@ -1043,14 +902,7 @@ void Fun7() {
             Y.angle = PID_realize(&pidy);
             X.anglewrite = 500 + (X.speed * 80) - X.angle;
             Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
-            if (X.anglewrite > X_angle_up)
-                X.anglewrite = X_angle_up;
-            if (X.anglewrite < X_angle_down)
-                X.anglewrite = X_angle_down;
-            if (Y.anglewrite > X_angle_up)
-                Y.anglewrite = X_angle_up;
-            if (Y.anglewrite < X_angle_down)
-                Y.anglewrite = X_angle_down;
+            limitServoAngle();
             SetServo(ID1, X.anglewrite);
             SetServo(ID2, Y.anglewrite);
             if (time_count > 3000)
@@ -1061,7 +913,7 @@ void Fun7() {
             }
         }
     }
-    
+
     OLED_ShowString(30, 6, "Part 5", 16);
     PID_init();
     X.now = X.target = X.p9;
@@ -1079,14 +931,7 @@ void Fun7() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 75) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 75) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (EXIT) {
@@ -1121,14 +966,7 @@ void gg() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 2500)
@@ -1156,14 +994,7 @@ void gg() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 2500)
@@ -1191,14 +1022,7 @@ void gg() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 80) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 3000)
@@ -1226,14 +1050,7 @@ void gg() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 80) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (time_count > 2500)
@@ -1260,14 +1077,7 @@ void gg() {
         Y.angle = PID_realize(&pidy);
         X.anglewrite = 500 + (X.speed * 75) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 75) - Y.angle;
-        if (X.anglewrite > X_angle_up)
-            X.anglewrite = X_angle_up;
-        if (X.anglewrite < X_angle_down)
-            X.anglewrite = X_angle_down;
-        if (Y.anglewrite > X_angle_up)
-            Y.anglewrite = X_angle_up;
-        if (Y.anglewrite < X_angle_down)
-            Y.anglewrite = X_angle_down;
+        limitServoAngle();
         SetServo(ID1, X.anglewrite);
         SetServo(ID2, Y.anglewrite);
         if (EXIT) {
@@ -1278,7 +1088,6 @@ void gg() {
     LobotSerialServoMove(ID1, 500, 500);
     LobotSerialServoMove(ID2, 500, 500);
 }
-
 
 /***********************************************************************************************************
 发挥项目：4
@@ -1302,6 +1111,7 @@ void Fun8() {
     }
 }
 
+// 实时显示小球坐标，按F1键记录当前位置为目标位置
 void ShowBall() {
     OLED_Clear();
     OLED_ShowString(0, 0, "====ShowBall====", 16);
@@ -1326,6 +1136,7 @@ void ShowBall() {
     }
 }
 
+// 设置各点坐标，把黑色小球放到对应点上，按CONF键记录当前坐标值
 void SetPoint() {
     uint8_t pointItem = 1;
     OLED_Clear();

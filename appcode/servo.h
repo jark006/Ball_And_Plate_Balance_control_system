@@ -1,11 +1,11 @@
 /*******************************************************************************
-* 文件名: LobotSerialServo.h
+* 文件名: servo.h
 * 作者: 深圳乐幻索尔科技
 * 日期：20160806
 *******************************************************************************/
 
-#ifndef LOBOTSERIALSERVO_H
-#define LOBOTSERIALSERVO_H
+#ifndef SERVO_H
+#define SERVO_H
 
 #include "stm32f10x.h"
 
