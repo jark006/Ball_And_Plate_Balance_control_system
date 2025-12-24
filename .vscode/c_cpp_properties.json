@@ -6,8 +6,6 @@
                 "${workspaceFolder}/CORE",
                 "${workspaceFolder}/STM32F10x_FWLib/inc",
                 "${workspaceFolder}/USER",
-                "${workspaceFolder}/SYSTEM/delay",
-                "${workspaceFolder}/SYSTEM/uart",
                 "${workspaceFolder}/appcode"
             ],
             "defines": [
