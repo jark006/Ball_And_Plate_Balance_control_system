@@ -5,7 +5,7 @@
 
 #define MAX_RCV_LEN3 256
 
-void USART3_Config(u32 baudRate);
+void USART3_Init(u32 baudRate);
 void USART3_Clear(void);
 
 #endif

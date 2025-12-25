@@ -4,7 +4,8 @@
 #include <stm32f10x.h>
 
 #define MAX_RCV_LEN2 256
-extern void USART2_Config(u32 baudRate);
-extern void USART2_Clear(void);
+
+void USART2_Init(u32 baudRate);
+void USART2_Clear(void);
 
 #endif

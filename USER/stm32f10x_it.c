@@ -72,11 +72,14 @@ void TIM2_IRQHandler(void) {
         /**************************************************************************************/
         int xSpeed = (int)X.now - X.last;
         int ySpeed = (int)Y.now - Y.last;
+        X.last = X.now;
+        Y.last = Y.now;
 
         if (xSpeed > 15)
             xSpeed = 15;
         else if (xSpeed < -15)
             xSpeed = -15;
+            
         if (ySpeed > 15)
             ySpeed = 15;
         else if (ySpeed < -15)
@@ -130,8 +133,6 @@ void USART3_IRQHandler(void) {
         if ((recvByte == 0xfe) && (usart3_rcv_len >= 7)) {
             if ((usart3_rcv_buf[usart3_rcv_len - 7]) == 0xef &&
                 usart3_rcv_buf[usart3_rcv_len - 6] == 0x0d) {
-                X.last = X.now;
-                Y.last = Y.now;
                 X.now = (usart3_rcv_buf[usart3_rcv_len - 5] << 8) |usart3_rcv_buf[usart3_rcv_len - 4];
                 Y.now = (usart3_rcv_buf[usart3_rcv_len - 3] << 8) | usart3_rcv_buf[usart3_rcv_len - 2];
                 usart3_rcv_len = 0;

@@ -37,6 +37,6 @@ typedef struct _pid {
 } PID;
 
 extern PID pidx, pidy;
-void PID_init(void);
+void PID_Init(void);
 int PID_realize(PID *pid);
 #endif

@@ -4,13 +4,13 @@
  *  作者：陈思杰
  ***********************************************************************************************************/
 
-#include "servo.h"
-#include "pid.h"
 #include "delay.h"
 #include "key.h"
 #include "led.h"
 #include "math.h"
 #include "oled.h"
+#include "pid.h"
+#include "servo.h"
 #include "stm32f10x.h"
 #include "timer.h"
 #include "usart1.h"
@@ -22,7 +22,8 @@
 #define ANGLE_MAX 700 // 舵机最大转角
 #define ANGLE_MIN 300 // 舵机最小转角
 
-void Funlist(void); // 功能项目列表
+void NVIC_Priority_Init();
+void Funlist(void);
 void ShowBall(void);
 void SetPoint(void);
 
@@ -36,48 +37,49 @@ void Fun7(void);
 void Fun8(void);
 
 // 初始化所有坐标
-Coordinate X = { 0, 0, 0, 22, 66, 110, 22, 66, 110, 22, 66, 110, 0, 0, 0, 0 };
-Coordinate Y = { 0, 0, 0, 17, 17, 17, 62, 62, 62, 105, 105, 105, 0, 0, 0, 0 };
+Coordinate X = {0, 0, 0, 22, 66, 110, 22, 66, 110, 22, 66, 110, 0, 0, 0, 0};
+Coordinate Y = {0, 0, 0, 17, 17, 17, 62, 62, 62, 105, 105, 105, 0, 0, 0, 0};
 
 /***********************************************************************************************************
 主程序
 ***********************************************************************************************************/
 int main(void) {
-    SystemInit(); // 系统时钟等初始化
-    delay_init(); // 延时初始化
-    NVIC_PriorityGroupConfig(
-        NVIC_PriorityGroup_2); // 设置NVIC中断分组2:2位抢占优先级，2位响应优先级
-    USART1_Config(115200);     // 串口1 打印调试
-    USART2_Config(115200);     // 串口2 控制舵机
-    USART3_Config(115200);     // 串口3 接收OpenMV的小球位置
-    Init_KEY();
-    PID_init();
+    SystemInit();         // 系统时钟等初始化
+    Delay_Init();         // 延时初始化
+    NVIC_Priority_Init(); // 中断分组
+    USART1_Init(115200);  // 串口1 打印调试
+    USART2_Init(115200);  // 串口2 控制舵机
+    USART3_Init(115200);  // 串口3 接收OpenMV的小球位置
+    TIM2_Init(300, 7200); // 定时30ms
+    KEY_Init();
+    PID_Init();
     OLED_Init();
-    OLED_Clear();
-    TIM2_Init(300 - 1, 7200 - 1); // 定时30ms
 
     Funlist();
 
     return 0;
 }
 
-static const char* const FunctionList[20] = {
+// 设置NVIC中断分组2
+void NVIC_Priority_Init() {
+    // 2位抢占优先级，2位响应优先级
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+}
+
+static const char *const FunctionList[20] = {
     "ShowBall", "SetPoint", "Item 1  ", "Item 2  ", "Item 3  ",
     "Item 4  ", "More 1  ", "More 2  ", "More 3  ", "More 4  ",
     "NULL    ", "NULL    ", "NULL    ", "NULL    ", "NULL    ",
 };
 
-/***********************************************************************************************************
-***********************************************************************************************************/
+// 功能列表
 void Funlist() {
     u8 itemIdx = 0;
     u8 isNeedRefresh = 1;
 
     OLED_Clear();
-    OLED_ShowString(10, 0, "Selet item", 16);
-    LobotSerialServoMove(ID1, 500, 500);
-    LobotSerialServoMove(ID2, 500, 500);
-    delay_ms(500);
+    OLED_ShowString(10, 0, "Select item", 16);
+    ServoResetPosition();
 
     while (1) {
         key_scan();
@@ -128,8 +130,8 @@ void Funlist() {
             default:
                 break;
             }
-            isNeedRefresh = 1;
-            OLED_ShowString(10, 0, "Selet item", 16);
+            isNeedRefresh = 1; // 从以上功能退出时，要刷新显示
+            OLED_ShowString(10, 0, "Select item", 16);
         }
     }
 }
@@ -151,7 +153,7 @@ void limitServoAngle() {
 基础项目：1
 ***********************************************************************************************************/
 void Fun1() {
-    PID_init();
+    PID_Init();
     X.target = X.p2;
     Y.target = Y.p2;
     pidx.SetValue = X.target;
@@ -188,8 +190,7 @@ void Fun1() {
             break;
         }
     }
-    LobotSerialServoMove(ID1, 500, 500);
-    LobotSerialServoMove(ID2, 500, 500);
+    ServoResetPosition();
 }
 
 /***********************************************************************************************************
@@ -198,7 +199,7 @@ void Fun1() {
 void Fun2() {
     int Xsp, Ysp;
 
-    PID_init();
+    PID_Init();
     X.target = X.p5;
     Y.target = Y.p5;
     pidx.SetValue = X.target;
@@ -236,8 +237,7 @@ void Fun2() {
             break;
         }
     }
-    LobotSerialServoMove(ID1, 500, 500);
-    LobotSerialServoMove(ID2, 500, 500);
+    ServoResetPosition();
 }
 
 /***********************************************************************************************************
@@ -246,7 +246,7 @@ void Fun2() {
 void Fun3() {
     uint32_t time_count = 0;
 
-    PID_init();
+    PID_Init();
     X.now = X.target = X.p4;
     Y.now = Y.target = Y.p4;
     pidx.ActualValue = X.now;
@@ -283,7 +283,7 @@ void Fun3() {
     }
 
     OLED_ShowString(30, 6, "Part 2", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = X.p5;
     Y.now = Y.target = Y.p5;
     pidx.ActualValue = X.now;
@@ -311,8 +311,7 @@ void Fun3() {
             break;
         }
     }
-    LobotSerialServoMove(ID1, 500, 500);
-    LobotSerialServoMove(ID2, 500, 500);
+    ServoResetPosition();
 }
 
 /***********************************************************************************************************
@@ -321,7 +320,7 @@ void Fun3() {
 void Fun4() {
     uint32_t time_count = 0;
 
-    PID_init();
+    PID_Init();
     X.now = X.target = X.p5;
     Y.now = Y.target = Y.p5;
     pidx.ActualValue = X.now;
@@ -355,7 +354,7 @@ void Fun4() {
     }
 
     OLED_ShowString(30, 6, "Part 2", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = 75;
     Y.now = Y.target = 75;
     pidx.ActualValue = X.now;
@@ -384,7 +383,7 @@ void Fun4() {
     }
 
     OLED_ShowString(30, 6, "Part 3", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = 85;
     Y.now = Y.target = 85;
     pidx.ActualValue = X.now;
@@ -413,7 +412,7 @@ void Fun4() {
     }
 
     OLED_ShowString(30, 6, "Part 4", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = X.p9;
     Y.now = Y.target = Y.p9;
     pidx.ActualValue = X.now;
@@ -436,8 +435,7 @@ void Fun4() {
             break;
         }
     }
-    LobotSerialServoMove(ID1, 500, 500);
-    LobotSerialServoMove(ID2, 500, 500);
+    ServoResetPosition();
 }
 
 /***********************************************************************************************************
@@ -450,7 +448,7 @@ void Fun5() {
     OLED_ShowString(0, 2, "Move by points", 16);
     OLED_ShowString(0, 4, "1 > 2 > 6 > 9 ", 16);
 
-    PID_init();
+    PID_Init();
     X.now = X.target = X.p2;
     Y.now = Y.target = Y.p2 + 5;
     pidx.ActualValue = X.now;
@@ -480,7 +478,7 @@ void Fun5() {
     }
 
     OLED_ShowString(30, 6, "Part 2", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = (X.p2 + X.p6) / 2;
     Y.now = Y.target = (Y.p2 + Y.p6) / 2;
     pidx.ActualValue = X.now;
@@ -510,7 +508,7 @@ void Fun5() {
     }
 
     OLED_ShowString(30, 6, "Part 3", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = X.p6 - 5;
     Y.now = Y.target = Y.p6 + 5;
     pidx.ActualValue = X.now;
@@ -540,7 +538,7 @@ void Fun5() {
     }
 
     OLED_ShowString(30, 6, "Part 4", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = (X.p9 + X.p6) / 2;
     Y.now = Y.target = (Y.p9 + Y.p6) / 2;
     pidx.ActualValue = X.now;
@@ -570,7 +568,7 @@ void Fun5() {
     }
 
     OLED_ShowString(30, 6, "Part 5", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = X.p9;
     Y.now = Y.target = Y.p9;
     pidx.ActualValue = X.now;
@@ -594,8 +592,7 @@ void Fun5() {
             break;
         }
     }
-    LobotSerialServoMove(ID1, 500, 500);
-    LobotSerialServoMove(ID2, 500, 500);
+    ServoResetPosition();
 }
 
 /***********************************************************************************************************
@@ -610,7 +607,7 @@ void Fun6() {
     OLED_ShowString(0, 4, "A > B > C > D ", 16);
     OLED_ShowString(30, 6, "Part 2", 16);
 
-    PID_init();
+    PID_Init();
     X.now = X.target = (X.p2 + X.p1) / 2;
     Y.now = Y.target = (Y.p2 + Y.p1) / 2;
     pidx.ActualValue = X.now;
@@ -640,7 +637,7 @@ void Fun6() {
     }
 
     OLED_ShowString(30, 6, "Part 1", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = X.p2;
     Y.now = Y.target = Y.p2;
     pidx.ActualValue = X.now;
@@ -669,7 +666,7 @@ void Fun6() {
     }
 
     OLED_ShowString(30, 6, "Part 2", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = (X.p2 + X.p6) / 2;
     Y.now = Y.target = (Y.p2 + Y.p6) / 2;
     pidx.ActualValue = X.now;
@@ -699,7 +696,7 @@ void Fun6() {
     }
 
     OLED_ShowString(30, 6, "Part 3", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = X.p6;
     Y.now = Y.target = Y.p6;
     pidx.ActualValue = X.now;
@@ -729,7 +726,7 @@ void Fun6() {
     }
 
     OLED_ShowString(30, 6, "Part 4", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = (X.p9 + X.p6) / 2;
     Y.now = Y.target = (Y.p9 + Y.p6) / 2;
     pidx.ActualValue = X.now;
@@ -759,7 +756,7 @@ void Fun6() {
     }
 
     OLED_ShowString(30, 6, "Part 5", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = X.p9;
     Y.now = Y.target = Y.p9;
     pidx.ActualValue = X.now;
@@ -783,8 +780,7 @@ void Fun6() {
             break;
         }
     }
-    LobotSerialServoMove(ID1, 500, 500);
-    LobotSerialServoMove(ID2, 500, 500);
+    ServoResetPosition();
 }
 
 /***********************************************************************************************************
@@ -799,7 +795,7 @@ void Fun7() {
     OLED_ShowString(30, 6, "Part 2", 16);
 
     while (cc--) {
-        PID_init();
+        PID_Init();
         X.now = X.target = X.p5 + 8;
         Y.now = Y.target = Y.p5;
         pidx.ActualValue = X.now;
@@ -829,7 +825,7 @@ void Fun7() {
         }
 
         OLED_ShowString(30, 6, "Part 1", 16);
-        PID_init();
+        PID_Init();
         X.now = X.target = X.p5 + 8;
         Y.now = Y.target = Y.p5;
         pidx.ActualValue = X.now;
@@ -857,7 +853,7 @@ void Fun7() {
         }
 
         OLED_ShowString(30, 6, "Part 2", 16);
-        PID_init();
+        PID_Init();
         X.now = X.target = X.p5;
         Y.now = Y.target = Y.p5 - 8;
         pidx.ActualValue = X.now;
@@ -885,7 +881,7 @@ void Fun7() {
             }
         }
         OLED_ShowString(30, 6, "Part 3", 16);
-        PID_init();
+        PID_Init();
         X.now = X.target = X.p5 - 8;
         Y.now = Y.target = Y.p5;
         pidx.ActualValue = X.now;
@@ -915,7 +911,7 @@ void Fun7() {
     }
 
     OLED_ShowString(30, 6, "Part 5", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = X.p9;
     Y.now = Y.target = Y.p9;
     pidx.ActualValue = X.now;
@@ -939,8 +935,7 @@ void Fun7() {
             break;
         }
     }
-    LobotSerialServoMove(ID1, 500, 500);
-    LobotSerialServoMove(ID2, 500, 500);
+    ServoResetPosition();
 }
 
 void gg() {
@@ -949,7 +944,7 @@ void gg() {
     OLED_ShowString(0, 0, "More 1", 16);
     OLED_ShowString(0, 2, "Move by points", 16);
     OLED_ShowString(0, 2, "A > B > C > D", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = X.p2;
     Y.now = Y.target = Y.p2;
     pidx.ActualValue = X.now;
@@ -977,7 +972,7 @@ void gg() {
         }
     }
     OLED_ShowString(30, 6, "Part 2", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = (X.p2 + X.p6) / 2;
     Y.now = Y.target = (Y.p2 + Y.p6) / 2;
     pidx.ActualValue = X.now;
@@ -1005,7 +1000,7 @@ void gg() {
         }
     }
     OLED_ShowString(30, 6, "Part 3", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = X.p6;
     Y.now = Y.target = Y.p6;
     pidx.ActualValue = X.now;
@@ -1033,7 +1028,7 @@ void gg() {
         }
     }
     OLED_ShowString(30, 6, "Part 4", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = (X.p9 + X.p6) / 2;
     Y.now = Y.target = (Y.p9 + Y.p6) / 2;
     pidx.ActualValue = X.now;
@@ -1062,7 +1057,7 @@ void gg() {
     }
     //*****************************************************************************
     OLED_ShowString(30, 6, "Part 5", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = X.p9;
     Y.now = Y.target = Y.p9;
     pidx.ActualValue = X.now;
@@ -1085,8 +1080,7 @@ void gg() {
             break;
         }
     }
-    LobotSerialServoMove(ID1, 500, 500);
-    LobotSerialServoMove(ID2, 500, 500);
+    ServoResetPosition();
 }
 
 /***********************************************************************************************************
@@ -1095,7 +1089,7 @@ void gg() {
 void Fun8() {
     OLED_Clear();
     OLED_ShowString(0, 2, "stay on 2 in 5s.", 16);
-    PID_init();
+    PID_Init();
     X.now = X.target = 63;
     Y.now = Y.target = 60;
     pidx.ActualValue = X.now;

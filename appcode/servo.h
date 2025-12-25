@@ -48,4 +48,5 @@ void LobotSerialServoSetID(uint8_t oldID, uint8_t newID);
 void LobotSerialServoMove(uint8_t id, int16_t position, uint16_t time);
 void LobotSerialServoUnload(uint8_t id);
 void LobotSerialServoLoad(uint8_t id);
+void ServoResetPosition();
 #endif

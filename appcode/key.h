@@ -15,7 +15,7 @@
 
 extern u8 keyValue;
 
-void Init_KEY(void);
+void KEY_Init(void);
 void key_scan(void);
 
 #endif

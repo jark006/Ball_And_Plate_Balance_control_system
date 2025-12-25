@@ -248,17 +248,16 @@ void OLED_DrawBMP(unsigned char x0, unsigned char y0, unsigned char x1,
 
 // 初始化SSD1306
 void OLED_Init(void) {
-    GPIO_InitTypeDef GPIO_InitStructure;
-
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE); // 使能PD端口时钟
 
+    GPIO_InitTypeDef GPIO_InitStructure;
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7; // PD6,PD7推挽输出
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;       // 推挽输出
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;      // 速度50MHz
     GPIO_Init(GPIOD, &GPIO_InitStructure);                 // 初始化GPIOD6,7
     GPIO_SetBits(GPIOD, GPIO_Pin_6 | GPIO_Pin_7);          // PD6,PD7 输出高
 
-    delay_ms(200);
+    delay_ms(50);
 
     Write_IIC_Command(0xAE); //--display off
     Write_IIC_Command(0x00); //---set low column address
@@ -274,24 +273,20 @@ void OLED_Init(void) {
     Write_IIC_Command(0xC8); // Com scan direction
     Write_IIC_Command(0xD3); //-set display offset
     Write_IIC_Command(0x00); //
-
     Write_IIC_Command(0xD5); // set osc division
     Write_IIC_Command(0x80); //
-
     Write_IIC_Command(0xD8); // set area color mode off
     Write_IIC_Command(0x05); //
-
     Write_IIC_Command(0xD9); // Set Pre-Charge Period
     Write_IIC_Command(0xF1); //
-
     Write_IIC_Command(0xDA); // set com pin configuartion
     Write_IIC_Command(0x12); //
-
     Write_IIC_Command(0xDB); // set Vcomh
     Write_IIC_Command(0x30); //
-
     Write_IIC_Command(0x8D); // set charge pump enable
     Write_IIC_Command(0x14); //
-
     Write_IIC_Command(0xAF); //--turn on oled panel
+    
+    delay_ms(50);
+    OLED_Clear();
 }

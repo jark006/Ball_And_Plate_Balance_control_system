@@ -15,7 +15,7 @@ volatile unsigned int usart2_rcv_len = 0;
 /*
  *  @brief USART2³õÊ¼»¯º¯Êý
  */
-void USART2_Config(u32 baudRate) {
+void USART2_Init(u32 baudRate) {
     GPIO_InitTypeDef GPIO_InitStructure;
     USART_InitTypeDef USART_InitStructure;
     NVIC_InitTypeDef NVIC_InitStructure;

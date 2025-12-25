@@ -11,7 +11,7 @@ uint8_t usart1_rcv_buf[MAX_RCV_LEN1];
 volatile unsigned int usart1_rcv_len = 0;
 
 // USART1≥ı ºªØ
-void USART1_Config(u32 baudRate) {
+void USART1_Init(u32 baudRate) {
     GPIO_InitTypeDef GPIO_InitStructure;
     USART_InitTypeDef USART_InitStructure;
     NVIC_InitTypeDef NVIC_InitStructure;

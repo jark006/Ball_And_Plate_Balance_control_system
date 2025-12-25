@@ -16,7 +16,7 @@
 
 PID pidx, pidy;
 
-void PID_init() {
+void PID_Init() {
     memset(&pidx, 0, sizeof(PID));
     memset(&pidy, 0, sizeof(PID));
 

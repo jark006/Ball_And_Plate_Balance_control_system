@@ -24,8 +24,8 @@ void TIM2_Init(u16 arr, u16 psc) {
     NVIC_Init(&NVIC_InitStructure);
 
     // 定时器TIM2初始化
-    TIM_TimeBaseStructure.TIM_Period = arr;
-    TIM_TimeBaseStructure.TIM_Prescaler = psc;
+    TIM_TimeBaseStructure.TIM_Period = arr - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = psc - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
@@ -59,8 +59,8 @@ void TIM3_Init(u16 arr, u16 psc) {
     NVIC_Init(&NVIC_InitStructure);
 
     // 定时器TIM3初始化
-    TIM_TimeBaseStructure.TIM_Period = arr;
-    TIM_TimeBaseStructure.TIM_Prescaler = psc;
+    TIM_TimeBaseStructure.TIM_Period = arr - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = psc - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);

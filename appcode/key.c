@@ -11,7 +11,7 @@
 
 u8 keyValue = 0;
 
-void Init_KEY(void) {
+void KEY_Init(void) {
     GPIO_InitTypeDef GPIO_InitStructure;
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); // 使能PB端口时钟
     GPIO_InitStructure.GPIO_Pin =

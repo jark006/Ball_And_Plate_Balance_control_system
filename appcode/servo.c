@@ -3,12 +3,13 @@
 *******************************************************************************/
 
 #include "servo.h"
+#include "delay.h"
 #include "stm32f10x.h"
 #include "usart1.h"
 #include <stdarg.h>
 #include <string.h>
 
-void LobotSerialWrite(uint8_t*buff, uint8_t len){
+void LobotSerialWrite(uint8_t* buff, uint8_t len) {
     usart_write(USART2, buff, len);
 }
 
@@ -78,4 +79,11 @@ void LobotSerialServoLoad(uint8_t id) {
     buf[5] = 1;
     buf[6] = LobotCheckSum(buf);
     LobotSerialWrite(buf, 7);
+}
+
+// 舵机回正  回复到初始平衡状态
+void ServoResetPosition() {
+    LobotSerialServoMove(ID1, 500, 500);
+    LobotSerialServoMove(ID2, 500, 500);
+    delay_ms(500);
 }
