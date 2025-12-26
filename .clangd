@@ -1,0 +1,15 @@
+CompileFlags:
+  Add:
+    - "-ID:/Keil_v5MDK/ARM/ARMCLANG/include"
+    - "-ID:/Keil_v5Packs/ARM/CMSIS/6.1.0/CMSIS/Core/Include"
+    - "-I${workspaceFolder}/CORE"
+    - "-I${workspaceFolder}/STM32F10x_FWLib/inc"
+    - "-I${workspaceFolder}/USER"
+    - "-I${workspaceFolder}/appcode"
+    - "-DSTM32F10X_HD"
+    - "-DUSE_STDPERIPH_DRIVER"
+    - "-target"
+    - "arm-none-eabi"
+    - "-mcpu=cortex-m3"
+    - "-mthumb"
+    - "-std=c99"
