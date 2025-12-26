@@ -10,7 +10,7 @@
       <TargetName>Target 1</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>6230000::V6.23::ARMCLANG</pCCUsed>
+      <pCCUsed>6240000::V6.24::ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\STM32F10x_FWLib\inc;..\CORE;..\SYSTEM\uart;..\SYSTEM\delay;..\APPcode;..\USER</IncludePath>
+              <IncludePath>..\STM32F10x_FWLib\inc;..\CORE;..\DRIVERS;..\USER</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -532,57 +532,57 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>APPcode</GroupName>
+          <GroupName>DRIVERS</GroupName>
           <Files>
             <File>
               <FileName>servo.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\appcode\servo.c</FilePath>
+              <FilePath>..\DRIVERS\servo.c</FilePath>
             </File>
             <File>
               <FileName>pid.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\appcode\pid.c</FilePath>
+              <FilePath>..\DRIVERS\pid.c</FilePath>
             </File>
             <File>
               <FileName>led.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\appcode\led.c</FilePath>
+              <FilePath>..\DRIVERS\led.c</FilePath>
             </File>
             <File>
               <FileName>timer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\appcode\timer.c</FilePath>
+              <FilePath>..\DRIVERS\timer.c</FilePath>
             </File>
             <File>
               <FileName>oled.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\appcode\oled.c</FilePath>
+              <FilePath>..\DRIVERS\oled.c</FilePath>
             </File>
             <File>
               <FileName>key.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\appcode\key.c</FilePath>
+              <FilePath>..\DRIVERS\key.c</FilePath>
             </File>
             <File>
               <FileName>delay.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\appcode\delay.c</FilePath>
+              <FilePath>..\DRIVERS\delay.c</FilePath>
             </File>
             <File>
               <FileName>usart1.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\appcode\usart1.c</FilePath>
+              <FilePath>..\DRIVERS\usart1.c</FilePath>
             </File>
             <File>
               <FileName>usart2.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\appcode\usart2.c</FilePath>
+              <FilePath>..\DRIVERS\usart2.c</FilePath>
             </File>
             <File>
               <FileName>usart3.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\appcode\usart3.c</FilePath>
+              <FilePath>..\DRIVERS\usart3.c</FilePath>
             </File>
           </Files>
         </Group>

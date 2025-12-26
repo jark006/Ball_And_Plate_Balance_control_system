@@ -3,15 +3,22 @@
         {
             "name": "STM32",
             "includePath": [
+                "D:/Keil_v5Packs/ARM/CMSIS/6.2.0/CMSIS/Core/Include",
+                "D:/Keil_v5/ARM/ARMCLANG/include",
                 "${workspaceFolder}/CORE",
                 "${workspaceFolder}/STM32F10x_FWLib/inc",
-                "${workspaceFolder}/USER",
-                "${workspaceFolder}/appcode"
+                "${workspaceFolder}/DRIVERS",
+                "${workspaceFolder}/USER"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE",
+                "__ICCARM__",
+                "__PACKED_STRUCT=struct",
+                "__STATIC_FORCEINLINE=static",
+                "__ARM_ACLE=200",
+                "__ARMCC_VERSION=6240000",
                 "STM32F10X_HD",
                 "USE_STDPERIPH_DRIVER",
                 "uint64_t=unsigned long long",
@@ -19,11 +26,8 @@
                 "uint16_t=unsigned short",
                 "uint8_t=unsigned char"
             ],
-            "windowsSdkVersion": "10.0.26100.0",
-            "compilerPath": "cl.exe",
-            "cStandard": "c17",
-            "cppStandard": "c++17",
-            "intelliSenseMode": "windows-msvc-arm"
+            "cStandard": "c99",
+            "intelliSenseMode": "linux-gcc-arm"
         }
     ],
     "version": 4
