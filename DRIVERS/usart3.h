@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stm32f10x.h>
 
-#define MAX_RCV_LEN3 256
+#define MAX_RCV_LEN3 32
 
 void USART3_Init(u32 baudRate);
 void USART3_Clear(void);

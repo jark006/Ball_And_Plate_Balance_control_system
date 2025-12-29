@@ -10,15 +10,7 @@ typedef struct _POINT {
     uint16_t now;    // 当前坐标
     uint16_t target; // 目标坐标
 
-    uint16_t p1; // p1标识点
-    uint16_t p2; // p2标识点
-    uint16_t p3; // p3标识点
-    uint16_t p4; // p4标识点
-    uint16_t p5; // p5标识点
-    uint16_t p6; // p6标识点
-    uint16_t p7; // p7标识点
-    uint16_t p8; // p8标识点
-    uint16_t p9; // p9标识点
+    uint16_t p[10]; // idx:0 首位预留， idx: 1~9 对应 p1~p9标识点
 
     int angle; // 舵机角度偏值
     int anglewrite;

@@ -107,7 +107,8 @@ extern volatile unsigned int usart1_rcv_len;
 void USART1_IRQHandler(void) {
     if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
         usart1_rcv_buf[usart1_rcv_len++] = USART1->DR; // 取出接收寄存器数据
-        usart1_rcv_len &= 0XFF;                        // 防止越界
+        if(usart1_rcv_len >= MAX_RCV_LEN1)             // 防止越界
+            usart1_rcv_len = 0;
     }
 }
 
@@ -117,7 +118,8 @@ extern volatile unsigned int usart2_rcv_len;
 void USART2_IRQHandler(void) {
     if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) {
         usart2_rcv_buf[usart2_rcv_len++] = USART2->DR; // 取出接收寄存器数据
-        usart2_rcv_len &= 0XFF;                        // 防止越界
+        if(usart2_rcv_len >= MAX_RCV_LEN2)             // 防止越界
+            usart2_rcv_len = 0;
     }
 }
 
@@ -128,7 +130,8 @@ void USART3_IRQHandler(void) {
     if (USART_GetITStatus(USART3, USART_IT_RXNE) != RESET) {
         const uint8_t recvByte = USART3->DR;           // 取出接收寄存器数据
         usart3_rcv_buf[usart3_rcv_len++] = recvByte;
-        usart3_rcv_len &= 0XFF;                        // 防止越界
+        if(usart3_rcv_len >= MAX_RCV_LEN3)             // 防止越界
+            usart3_rcv_len = 0;
 
         if ((recvByte == 0xfe) && (usart3_rcv_len >= 7)) {
             if ((usart3_rcv_buf[usart3_rcv_len - 7]) == 0xef &&

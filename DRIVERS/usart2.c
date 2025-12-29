@@ -64,13 +64,3 @@ void USART2_Clear(void) {
     memset(usart2_rcv_buf, 0, sizeof(usart2_rcv_buf));
     usart2_rcv_len = 0;
 }
-
-/*
- *  @brief 返回USART2已接收的数据到buf，长度为rcv_len
- */
-void USART2_GetRcvData(uint8_t *buf, uint32_t rcv_len) {
-    if (buf) {
-        memcpy(buf, usart2_rcv_buf, rcv_len);
-    }
-    USART2_Clear();
-}

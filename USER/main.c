@@ -22,19 +22,26 @@
 #define ANGLE_MAX 700 // 舵机最大转角
 #define ANGLE_MIN 300 // 舵机最小转角
 
+typedef struct {
+    void (*fun)(void);
+    const char *name;
+} FunctionStreuct;
+
 void NVIC_Priority_Init();
 void Funlist(void);
 void ShowBall(void);
 void SetPoint(void);
 
-void Fun1(void);
-void Fun2(void);
-void Fun3(void);
-void Fun4(void);
-void Fun5(void);
-void Fun6(void);
-void Fun7(void);
-void Fun8(void);
+void Base1(void);
+void Base2(void);
+void Base3(void);
+void Base4(void);
+void More1(void);
+void More2(void);
+void More3(void);
+void More4(void);
+
+void More2Test();
 
 // 初始化所有坐标
 Coordinate X = {0, 0, 0, 22, 66, 110, 22, 66, 110, 22, 66, 110, 0, 0, 0, 0};
@@ -66,72 +73,41 @@ void NVIC_Priority_Init() {
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 }
 
-static const char *const FunctionList[20] = {
-    "ShowBall", "SetPoint", "Item 1  ", "Item 2  ", "Item 3  ",
-    "Item 4  ", "More 1  ", "More 2  ", "More 3  ", "More 4  ",
-    "NULL    ", "NULL    ", "NULL    ", "NULL    ", "NULL    ",
-};
-
 // 功能列表
 void Funlist() {
-    u8 itemIdx = 0;
+    const FunctionStreuct FunctionTable[] = {
+        {ShowBall, "ShowBall"}, {SetPoint, "SetPoint"}, {Base1, "Base 1  "},
+        {Base2, "Base 2  "},    {Base3, "Base 3  "},    {Base4, "Base 4  "},
+        {More1, "More 1  "},    {More2, "More 2  "},    {More3, "More 3  "},
+        {More4, "More 4  "},
+    };
+    u8 funcIdx = 0;
     u8 isNeedRefresh = 1;
 
     OLED_Clear();
-    OLED_ShowString(10, 0, "Select item", 16);
+    OLED_ShowString(10, 0, "Select Func", 16);
     ServoResetPosition();
 
     while (1) {
         key_scan();
-        if ((UP || LEFT) && itemIdx > 0) {
-            itemIdx--;
+        if ((UP || LEFT) && funcIdx > 0) {
+            funcIdx--;
             isNeedRefresh = 1;
         }
-        if ((DOWN || RIGHT) && itemIdx < 10) {
-            itemIdx++;
+        if ((DOWN || RIGHT) && funcIdx < 10) {
+            funcIdx++;
             isNeedRefresh = 1;
         }
         if (isNeedRefresh) {
             isNeedRefresh = 0;
-            OLED_ShowString(10, 4, FunctionList[itemIdx], 16);
+            OLED_ShowString(10, 4, FunctionTable[funcIdx].name, 16);
         }
         if (CONF) {
-            switch (itemIdx) {
-            case 0:
-                ShowBall();
-                break;
-            case 1:
-                SetPoint();
-                break;
-            case 2:
-                Fun1();
-                break;
-            case 3:
-                Fun2();
-                break;
-            case 4:
-                Fun3();
-                break;
-            case 5:
-                Fun4();
-                break;
-            case 6:
-                Fun5();
-                break;
-            case 7:
-                Fun6();
-                break;
-            case 8:
-                Fun7();
-                break;
-            case 9:
-                Fun8();
-                break;
-            default:
-                break;
+            if (funcIdx < sizeof(FunctionTable) / sizeof(FunctionStreuct)) {
+                FunctionTable[funcIdx].fun();
             }
             isNeedRefresh = 1; // 从以上功能退出时，要刷新显示
-            OLED_ShowString(10, 0, "Select item", 16);
+            OLED_ShowString(10, 0, "Select Func", 16);
         }
     }
 }
@@ -152,17 +128,17 @@ void limitServoAngle() {
 /***********************************************************************************************************
 基础项目：1
 ***********************************************************************************************************/
-void Fun1() {
+void Base1() {
     PID_Init();
-    X.target = X.p2;
-    Y.target = Y.p2;
+    X.target = X.p[2];
+    Y.target = Y.p[2];
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
     X.speed = 0;
     Y.speed = 0;
 
     OLED_Clear();
-    OLED_ShowString(0, 0, "Item 1", 16);
+    OLED_ShowString(0, 0, "Base 1", 16);
     OLED_ShowString(0, 2, "stay on 2 in 5s.", 16);
 
     while (1) {
@@ -196,12 +172,12 @@ void Fun1() {
 /***********************************************************************************************************
 基础项目：2
 ***********************************************************************************************************/
-void Fun2() {
+void Base2() {
     int Xsp, Ysp;
 
     PID_Init();
-    X.target = X.p5;
-    Y.target = Y.p5;
+    X.target = X.p[5];
+    Y.target = Y.p[5];
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
     pidx.Ki = pidy.Ki = 0.0035;
@@ -209,7 +185,7 @@ void Fun2() {
     Y.speed = 0;
 
     OLED_Clear();
-    OLED_ShowString(0, 0, "Item 2", 16);
+    OLED_ShowString(0, 0, "Base 2", 16);
     OLED_ShowString(0, 2, "Move from 1 to 5", 16);
 
     while (1) {
@@ -243,19 +219,19 @@ void Fun2() {
 /***********************************************************************************************************
 基础项目：3
 ***********************************************************************************************************/
-void Fun3() {
-    uint32_t time_count = 0;
+void Base3() {
+    u32 time_count = 0;
 
     PID_Init();
-    X.now = X.target = X.p4;
-    Y.now = Y.target = Y.p4;
+    X.now = X.target = X.p[4];
+    Y.now = Y.target = Y.p[4];
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
 
     OLED_Clear();
-    OLED_ShowString(0, 0, "Item 3", 16);
+    OLED_ShowString(0, 0, "Base 3", 16);
     OLED_ShowString(0, 2, "Move from 1 to 4,stay 2s", 16);
     OLED_ShowString(0, 4, "then 4 to 5", 16);
 
@@ -284,8 +260,8 @@ void Fun3() {
 
     OLED_ShowString(30, 6, "Part 2", 16);
     PID_Init();
-    X.now = X.target = X.p5;
-    Y.now = Y.target = Y.p5;
+    X.now = X.target = X.p[5];
+    Y.now = Y.target = Y.p[5];
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -317,19 +293,19 @@ void Fun3() {
 /***********************************************************************************************************
 基础项目：4
 ***********************************************************************************************************/
-void Fun4() {
-    uint32_t time_count = 0;
+void Base4() {
+    u32 time_count = 0;
 
     PID_Init();
-    X.now = X.target = X.p5;
-    Y.now = Y.target = Y.p5;
+    X.now = X.target = X.p[5];
+    Y.now = Y.target = Y.p[5];
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
     pidy.SetValue = Y.target;
 
     OLED_Clear();
-    OLED_ShowString(0, 0, "Item 4", 16);
+    OLED_ShowString(0, 0, "Base 4", 16);
     OLED_ShowString(0, 2, "Move from 1 to 9,stay 2s", 16);
 
     OLED_ShowString(30, 6, "Part 1", 16);
@@ -413,8 +389,8 @@ void Fun4() {
 
     OLED_ShowString(30, 6, "Part 4", 16);
     PID_Init();
-    X.now = X.target = X.p9;
-    Y.now = Y.target = Y.p9;
+    X.now = X.target = X.p[9];
+    Y.now = Y.target = Y.p[9];
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -441,16 +417,16 @@ void Fun4() {
 /***********************************************************************************************************
 发挥项目：1
 ***********************************************************************************************************/
-void Fun5() {
-    uint32_t time_count = 0;
+void More1() {
+    u32 time_count = 0;
     OLED_Clear();
     OLED_ShowString(0, 0, "More 1", 16);
     OLED_ShowString(0, 2, "Move by points", 16);
     OLED_ShowString(0, 4, "1 > 2 > 6 > 9 ", 16);
 
     PID_Init();
-    X.now = X.target = X.p2;
-    Y.now = Y.target = Y.p2 + 5;
+    X.now = X.target = X.p[2];
+    Y.now = Y.target = Y.p[2] + 5;
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -479,8 +455,8 @@ void Fun5() {
 
     OLED_ShowString(30, 6, "Part 2", 16);
     PID_Init();
-    X.now = X.target = (X.p2 + X.p6) / 2;
-    Y.now = Y.target = (Y.p2 + Y.p6) / 2;
+    X.now = X.target = (X.p[2] + X.p[6]) / 2;
+    Y.now = Y.target = (Y.p[2] + Y.p[6]) / 2;
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -509,8 +485,8 @@ void Fun5() {
 
     OLED_ShowString(30, 6, "Part 3", 16);
     PID_Init();
-    X.now = X.target = X.p6 - 5;
-    Y.now = Y.target = Y.p6 + 5;
+    X.now = X.target = X.p[6] - 5;
+    Y.now = Y.target = Y.p[6] + 5;
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -539,8 +515,8 @@ void Fun5() {
 
     OLED_ShowString(30, 6, "Part 4", 16);
     PID_Init();
-    X.now = X.target = (X.p9 + X.p6) / 2;
-    Y.now = Y.target = (Y.p9 + Y.p6) / 2;
+    X.now = X.target = (X.p[9] + X.p[6]) / 2;
+    Y.now = Y.target = (Y.p[9] + Y.p[6]) / 2;
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -569,8 +545,8 @@ void Fun5() {
 
     OLED_ShowString(30, 6, "Part 5", 16);
     PID_Init();
-    X.now = X.target = X.p9;
-    Y.now = Y.target = Y.p9;
+    X.now = X.target = X.p[9];
+    Y.now = Y.target = Y.p[9];
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -598,8 +574,8 @@ void Fun5() {
 /***********************************************************************************************************
 发挥项目：2
 ***********************************************************************************************************/
-void Fun6() {
-    uint32_t time_count = 0;
+void More2() {
+    u32 time_count = 0;
 
     OLED_Clear();
     OLED_ShowString(0, 0, "More 2", 16);
@@ -608,8 +584,8 @@ void Fun6() {
     OLED_ShowString(30, 6, "Part 2", 16);
 
     PID_Init();
-    X.now = X.target = (X.p2 + X.p1) / 2;
-    Y.now = Y.target = (Y.p2 + Y.p1) / 2;
+    X.now = X.target = (X.p[2] + X.p[1]) / 2;
+    Y.now = Y.target = (Y.p[2] + Y.p[1]) / 2;
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -638,8 +614,8 @@ void Fun6() {
 
     OLED_ShowString(30, 6, "Part 1", 16);
     PID_Init();
-    X.now = X.target = X.p2;
-    Y.now = Y.target = Y.p2;
+    X.now = X.target = X.p[2];
+    Y.now = Y.target = Y.p[2];
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -667,8 +643,8 @@ void Fun6() {
 
     OLED_ShowString(30, 6, "Part 2", 16);
     PID_Init();
-    X.now = X.target = (X.p2 + X.p6) / 2;
-    Y.now = Y.target = (Y.p2 + Y.p6) / 2;
+    X.now = X.target = (X.p[2] + X.p[6]) / 2;
+    Y.now = Y.target = (Y.p[2] + Y.p[6]) / 2;
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -697,8 +673,8 @@ void Fun6() {
 
     OLED_ShowString(30, 6, "Part 3", 16);
     PID_Init();
-    X.now = X.target = X.p6;
-    Y.now = Y.target = Y.p6;
+    X.now = X.target = X.p[6];
+    Y.now = Y.target = Y.p[6];
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -727,8 +703,8 @@ void Fun6() {
 
     OLED_ShowString(30, 6, "Part 4", 16);
     PID_Init();
-    X.now = X.target = (X.p9 + X.p6) / 2;
-    Y.now = Y.target = (Y.p9 + Y.p6) / 2;
+    X.now = X.target = (X.p[9] + X.p[6]) / 2;
+    Y.now = Y.target = (Y.p[9] + Y.p[6]) / 2;
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -757,8 +733,8 @@ void Fun6() {
 
     OLED_ShowString(30, 6, "Part 5", 16);
     PID_Init();
-    X.now = X.target = X.p9;
-    Y.now = Y.target = Y.p9;
+    X.now = X.target = X.p[9];
+    Y.now = Y.target = Y.p[9];
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -786,18 +762,18 @@ void Fun6() {
 /***********************************************************************************************************
 发挥项目：3
 ***********************************************************************************************************/
-void Fun7() {
+void More3() {
     int time_count = 0;
     int cc = 3;
     OLED_Clear();
-    OLED_ShowString(0, 0, "more 3", 16);
+    OLED_ShowString(0, 0, "More 3", 16);
     OLED_ShowString(0, 2, "Move soround 5", 16);
     OLED_ShowString(30, 6, "Part 2", 16);
 
     while (cc--) {
         PID_Init();
-        X.now = X.target = X.p5 + 8;
-        Y.now = Y.target = Y.p5;
+        X.now = X.target = X.p[5] + 8;
+        Y.now = Y.target = Y.p[5];
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
         pidx.SetValue = X.target;
@@ -826,8 +802,8 @@ void Fun7() {
 
         OLED_ShowString(30, 6, "Part 1", 16);
         PID_Init();
-        X.now = X.target = X.p5 + 8;
-        Y.now = Y.target = Y.p5;
+        X.now = X.target = X.p[5] + 8;
+        Y.now = Y.target = Y.p[5];
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
         pidx.SetValue = X.target;
@@ -854,8 +830,8 @@ void Fun7() {
 
         OLED_ShowString(30, 6, "Part 2", 16);
         PID_Init();
-        X.now = X.target = X.p5;
-        Y.now = Y.target = Y.p5 - 8;
+        X.now = X.target = X.p[5];
+        Y.now = Y.target = Y.p[5] - 8;
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
         pidx.SetValue = X.target;
@@ -882,8 +858,8 @@ void Fun7() {
         }
         OLED_ShowString(30, 6, "Part 3", 16);
         PID_Init();
-        X.now = X.target = X.p5 - 8;
-        Y.now = Y.target = Y.p5;
+        X.now = X.target = X.p[5] - 8;
+        Y.now = Y.target = Y.p[5];
         pidx.ActualValue = X.now;
         pidy.ActualValue = Y.now;
         pidx.SetValue = X.target;
@@ -912,8 +888,8 @@ void Fun7() {
 
     OLED_ShowString(30, 6, "Part 5", 16);
     PID_Init();
-    X.now = X.target = X.p9;
-    Y.now = Y.target = Y.p9;
+    X.now = X.target = X.p[9];
+    Y.now = Y.target = Y.p[9];
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -938,15 +914,18 @@ void Fun7() {
     ServoResetPosition();
 }
 
-void gg() {
-    uint32_t time_count = 0;
+/***********************************************************************************************************
+发挥项目：2  测试
+***********************************************************************************************************/
+void More2Test() {
+    u32 time_count = 0;
     OLED_Clear();
     OLED_ShowString(0, 0, "More 1", 16);
     OLED_ShowString(0, 2, "Move by points", 16);
     OLED_ShowString(0, 2, "A > B > C > D", 16);
     PID_Init();
-    X.now = X.target = X.p2;
-    Y.now = Y.target = Y.p2;
+    X.now = X.target = X.p[2];
+    Y.now = Y.target = Y.p[2];
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -973,8 +952,8 @@ void gg() {
     }
     OLED_ShowString(30, 6, "Part 2", 16);
     PID_Init();
-    X.now = X.target = (X.p2 + X.p6) / 2;
-    Y.now = Y.target = (Y.p2 + Y.p6) / 2;
+    X.now = X.target = (X.p[2] + X.p[6]) / 2;
+    Y.now = Y.target = (Y.p[2] + Y.p[6]) / 2;
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -1001,8 +980,8 @@ void gg() {
     }
     OLED_ShowString(30, 6, "Part 3", 16);
     PID_Init();
-    X.now = X.target = X.p6;
-    Y.now = Y.target = Y.p6;
+    X.now = X.target = X.p[6];
+    Y.now = Y.target = Y.p[6];
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -1029,8 +1008,8 @@ void gg() {
     }
     OLED_ShowString(30, 6, "Part 4", 16);
     PID_Init();
-    X.now = X.target = (X.p9 + X.p6) / 2;
-    Y.now = Y.target = (Y.p9 + Y.p6) / 2;
+    X.now = X.target = (X.p[9] + X.p[6]) / 2;
+    Y.now = Y.target = (Y.p[9] + Y.p[6]) / 2;
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -1058,8 +1037,8 @@ void gg() {
     //*****************************************************************************
     OLED_ShowString(30, 6, "Part 5", 16);
     PID_Init();
-    X.now = X.target = X.p9;
-    Y.now = Y.target = Y.p9;
+    X.now = X.target = X.p[9];
+    Y.now = Y.target = Y.p[9];
     pidx.ActualValue = X.now;
     pidy.ActualValue = Y.now;
     pidx.SetValue = X.target;
@@ -1086,8 +1065,9 @@ void gg() {
 /***********************************************************************************************************
 发挥项目：4
 ***********************************************************************************************************/
-void Fun8() {
+void More4() {
     OLED_Clear();
+    OLED_ShowString(0, 0, "More 4", 16);
     OLED_ShowString(0, 2, "stay on 2 in 5s.", 16);
     PID_Init();
     X.now = X.target = 63;
@@ -1132,7 +1112,8 @@ void ShowBall() {
 
 // 设置各点坐标，把黑色小球放到对应点上，按CONF键记录当前坐标值
 void SetPoint() {
-    uint8_t pointItem = 1;
+    char pointStr[4] = "Px";
+    u8 pointIdx = 5; // 1~9 对应 p1-p9
     OLED_Clear();
     OLED_ShowString(0, 0, "====SetPoint====", 16);
     OLED_ShowString(0, 2, "Set:     X   Y", 16);
@@ -1142,100 +1123,19 @@ void SetPoint() {
         key_scan();
         OLED_ShowNum(40, 6, X.now, 5, 16);
         OLED_ShowNum(88, 6, Y.now, 5, 16);
-        if ((UP || LEFT) && pointItem > 1)
-            pointItem--;
-        if ((DOWN || RIGHT) && pointItem < 9)
-            pointItem++;
-        switch (pointItem) {
-        case 1:
-            OLED_ShowString(32, 2, "P1", 16);
-            OLED_ShowNum(40, 4, X.p1, 5, 16);
-            OLED_ShowNum(88, 4, Y.p1, 5, 16);
-            break;
-        case 2:
-            OLED_ShowString(32, 2, "P2", 16);
-            OLED_ShowNum(40, 4, X.p2, 5, 16);
-            OLED_ShowNum(88, 4, Y.p2, 5, 16);
-            break;
-        case 3:
-            OLED_ShowString(32, 2, "P3", 16);
-            OLED_ShowNum(40, 4, X.p3, 5, 16);
-            OLED_ShowNum(88, 4, Y.p3, 5, 16);
-            break;
-        case 4:
-            OLED_ShowString(32, 2, "P4", 16);
-            OLED_ShowNum(40, 4, X.p4, 5, 16);
-            OLED_ShowNum(88, 4, Y.p4, 5, 16);
-            break;
-        case 5:
-            OLED_ShowString(32, 2, "P5", 16);
-            OLED_ShowNum(40, 4, X.p5, 5, 16);
-            OLED_ShowNum(88, 4, Y.p5, 5, 16);
-            break;
-        case 6:
-            OLED_ShowString(32, 2, "P6", 16);
-            OLED_ShowNum(40, 4, X.p6, 5, 16);
-            OLED_ShowNum(88, 4, Y.p6, 5, 16);
-            break;
-        case 7:
-            OLED_ShowString(32, 2, "P7", 16);
-            OLED_ShowNum(40, 4, X.p7, 5, 16);
-            OLED_ShowNum(88, 4, Y.p7, 5, 16);
-            break;
-        case 8:
-            OLED_ShowString(32, 2, "P8", 16);
-            OLED_ShowNum(40, 4, X.p8, 5, 16);
-            OLED_ShowNum(88, 4, Y.p8, 5, 16);
-            break;
-        case 9:
-            OLED_ShowString(32, 2, "P9", 16);
-            OLED_ShowNum(40, 4, X.p9, 5, 16);
-            OLED_ShowNum(88, 4, Y.p9, 5, 16);
-            break;
-        default:
-            break;
-        }
+        if ((UP || LEFT) && pointIdx > 1)
+            pointIdx--;
+        if ((DOWN || RIGHT) && pointIdx < 9)
+            pointIdx++;
+
+        pointStr[1] = pointIdx + '0';
+        OLED_ShowString(32, 2, pointStr, 16);
+        OLED_ShowNum(40, 4, X.p[pointIdx], 5, 16);
+        OLED_ShowNum(88, 4, Y.p[pointIdx], 5, 16);
+
         if (CONF) {
-            switch (pointItem) {
-            case 1:
-                X.p1 = X.now;
-                Y.p1 = Y.now;
-                break;
-            case 2:
-                X.p2 = X.now;
-                Y.p2 = Y.now;
-                break;
-            case 3:
-                X.p3 = X.now;
-                Y.p3 = Y.now;
-                break;
-            case 4:
-                X.p4 = X.now;
-                Y.p4 = Y.now;
-                break;
-            case 5:
-                X.p5 = X.now;
-                Y.p5 = Y.now;
-                break;
-            case 6:
-                X.p6 = X.now;
-                Y.p6 = Y.now;
-                break;
-            case 7:
-                X.p7 = X.now;
-                Y.p7 = Y.now;
-                break;
-            case 8:
-                X.p8 = X.now;
-                Y.p8 = Y.now;
-                break;
-            case 9:
-                X.p9 = X.now;
-                Y.p9 = Y.now;
-                break;
-            default:
-                break;
-            }
+            X.p[pointIdx] = X.now;
+            Y.p[pointIdx] = Y.now;
         }
         if (EXIT) {
             OLED_Clear();
