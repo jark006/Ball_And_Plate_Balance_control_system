@@ -25,9 +25,7 @@
 #include "stm32f10x_it.h"
 #include "pid.h"
 #include "stdio.h"
-#include "usart1.h"
-#include "usart2.h"
-#include "usart3.h"
+#include "usart.h"
 
 extern Coordinate X, Y;
 
@@ -101,8 +99,8 @@ void TIM3_IRQHandler(void) {
     }
 }
 
-extern uint8_t usart1_rcv_buf[MAX_RCV_LEN1];
-extern volatile unsigned int usart1_rcv_len;
+extern u8 usart1_rcv_buf[];
+extern volatile u32 usart1_rcv_len;
 
 void USART1_IRQHandler(void) {
     if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
@@ -112,8 +110,8 @@ void USART1_IRQHandler(void) {
     }
 }
 
-extern unsigned char usart2_rcv_buf[MAX_RCV_LEN2];
-extern volatile unsigned int usart2_rcv_len;
+extern u8 usart2_rcv_buf[];
+extern volatile u32 usart2_rcv_len;
 
 void USART2_IRQHandler(void) {
     if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) {
@@ -123,8 +121,8 @@ void USART2_IRQHandler(void) {
     }
 }
 
-extern unsigned char usart3_rcv_buf[MAX_RCV_LEN3];
-extern volatile unsigned int usart3_rcv_len;
+extern u8 usart3_rcv_buf[];
+extern volatile u32 usart3_rcv_len;
 
 void USART3_IRQHandler(void) {
     if (USART_GetITStatus(USART3, USART_IT_RXNE) != RESET) {

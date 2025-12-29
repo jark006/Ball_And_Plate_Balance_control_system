@@ -1,4 +1,4 @@
-#include "KEY.h"
+#include "key.h"
 #include "delay.h"
 
 #define K1 PBout(4)

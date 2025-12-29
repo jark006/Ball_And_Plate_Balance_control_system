@@ -2,15 +2,13 @@
 舵机控制程序
 *******************************************************************************/
 
+#include "stm32f10x.h"
 #include "servo.h"
 #include "delay.h"
-#include "stm32f10x.h"
-#include "usart1.h"
-#include <stdarg.h>
-#include <string.h>
+#include "usart.h"
 
-void LobotSerialWrite(uint8_t* buff, uint8_t len) {
-    usart_write(USART2, buff, len);
+void LobotSerialWrite(const u8* buf, u8 len) {
+    USART_Write(USART2, buf, len);
 }
 
 // 宏函数 获得A的低八位
@@ -81,7 +79,7 @@ void LobotSerialServoLoad(uint8_t id) {
     LobotSerialWrite(buf, 7);
 }
 
-// 舵机回正  回复到初始平衡状态
+// 舵机回正  恢复到初始平衡状态
 void ServoResetPosition() {
     LobotSerialServoMove(ID1, 500, 500);
     LobotSerialServoMove(ID2, 500, 500);

@@ -4,20 +4,15 @@
  *  作者：陈思杰
  ***********************************************************************************************************/
 
+#include "stm32f10x.h"
 #include "delay.h"
 #include "key.h"
 #include "led.h"
-#include "math.h"
 #include "oled.h"
 #include "pid.h"
 #include "servo.h"
-#include "stm32f10x.h"
 #include "timer.h"
-#include "usart1.h"
-#include "usart2.h"
-#include "usart3.h"
-#include <stdio.h>
-#include <string.h>
+#include "usart.h"
 
 #define ANGLE_MAX 700 // 舵机最大转角
 #define ANGLE_MIN 300 // 舵机最小转角
@@ -153,8 +148,8 @@ void Base1() {
                 X.anglewrite = 500 + (X.speed * 60) - X.angle;
                 Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
                 limitServoAngle();
-                SetServo(ID1, X.anglewrite);
-                SetServo(ID2, Y.anglewrite);
+                ServoMove(ID1, X.anglewrite);
+                ServoMove(ID2, Y.anglewrite);
                 if (EXIT) {
                     OLED_Clear();
                     break;
@@ -206,8 +201,8 @@ void Base2() {
         X.anglewrite = 500 + Xsp - X.angle;
         Y.anglewrite = 500 + Ysp - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (EXIT) {
             OLED_Clear();
             break;
@@ -248,8 +243,8 @@ void Base3() {
         X.anglewrite = 500 + (X.speed * 95) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 95) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 5000)
             break;
         if (EXIT) {
@@ -280,8 +275,8 @@ void Base3() {
         X.anglewrite = 500 + (X.speed * 90) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 90) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (EXIT) {
             OLED_Clear();
             break;
@@ -319,8 +314,8 @@ void Base4() {
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 1500)
             break;
         if (EXIT) {
@@ -348,8 +343,8 @@ void Base4() {
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 1500)
             break;
         if (EXIT) {
@@ -377,8 +372,8 @@ void Base4() {
         X.anglewrite = 500 + (X.speed * 75) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 70) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 1500)
             break;
         if (EXIT) {
@@ -404,8 +399,8 @@ void Base4() {
         X.anglewrite = 500 + (X.speed * 80) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (EXIT) {
             OLED_Clear();
             break;
@@ -443,8 +438,8 @@ void More1() {
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 2500)
             break;
         if (EXIT) {
@@ -473,8 +468,8 @@ void More1() {
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 2500)
             break;
         if (EXIT) {
@@ -503,8 +498,8 @@ void More1() {
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 3000)
             break;
         if (EXIT) {
@@ -533,8 +528,8 @@ void More1() {
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 2500)
             break;
         if (EXIT) {
@@ -561,8 +556,8 @@ void More1() {
         X.anglewrite = 500 + (X.speed * 70) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 70) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (EXIT) {
             OLED_Clear();
             break;
@@ -602,8 +597,8 @@ void More2() {
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 2500)
             break;
         if (EXIT) {
@@ -631,8 +626,8 @@ void More2() {
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 2500)
             break;
         if (EXIT) {
@@ -661,8 +656,8 @@ void More2() {
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 2500)
             break;
         if (EXIT) {
@@ -691,8 +686,8 @@ void More2() {
         X.anglewrite = 500 + (X.speed * 80) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 3000)
             break;
         if (EXIT) {
@@ -721,8 +716,8 @@ void More2() {
         X.anglewrite = 500 + (X.speed * 80) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 2500)
             break;
         if (EXIT) {
@@ -749,8 +744,8 @@ void More2() {
         X.anglewrite = 500 + (X.speed * 75) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 75) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (EXIT) {
             OLED_Clear();
             break;
@@ -790,8 +785,8 @@ void More3() {
             X.anglewrite = 500 + (X.speed * 60) - X.angle;
             Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
             limitServoAngle();
-            SetServo(ID1, X.anglewrite);
-            SetServo(ID2, Y.anglewrite);
+            ServoMove(ID1, X.anglewrite);
+            ServoMove(ID2, Y.anglewrite);
             if (time_count > 2500)
                 break;
             if (EXIT) {
@@ -818,8 +813,8 @@ void More3() {
             X.anglewrite = 500 + (X.speed * 60) - X.angle;
             Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
             limitServoAngle();
-            SetServo(ID1, X.anglewrite);
-            SetServo(ID2, Y.anglewrite);
+            ServoMove(ID1, X.anglewrite);
+            ServoMove(ID2, Y.anglewrite);
             if (time_count > 2500)
                 break;
             if (EXIT) {
@@ -847,8 +842,8 @@ void More3() {
             X.anglewrite = 500 + (X.speed * 60) - X.angle;
             Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
             limitServoAngle();
-            SetServo(ID1, X.anglewrite);
-            SetServo(ID2, Y.anglewrite);
+            ServoMove(ID1, X.anglewrite);
+            ServoMove(ID2, Y.anglewrite);
             if (time_count > 2500)
                 break;
             if (EXIT) {
@@ -875,8 +870,8 @@ void More3() {
             X.anglewrite = 500 + (X.speed * 80) - X.angle;
             Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
             limitServoAngle();
-            SetServo(ID1, X.anglewrite);
-            SetServo(ID2, Y.anglewrite);
+            ServoMove(ID1, X.anglewrite);
+            ServoMove(ID2, Y.anglewrite);
             if (time_count > 3000)
                 break;
             if (EXIT) {
@@ -904,8 +899,8 @@ void More3() {
         X.anglewrite = 500 + (X.speed * 75) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 75) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (EXIT) {
             OLED_Clear();
             break;
@@ -941,8 +936,8 @@ void More2Test() {
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 2500)
             break;
         if (EXIT) {
@@ -969,8 +964,8 @@ void More2Test() {
         X.anglewrite = 500 + (X.speed * 60) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 60) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 2500)
             break;
         if (EXIT) {
@@ -997,8 +992,8 @@ void More2Test() {
         X.anglewrite = 500 + (X.speed * 80) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 3000)
             break;
         if (EXIT) {
@@ -1025,8 +1020,8 @@ void More2Test() {
         X.anglewrite = 500 + (X.speed * 80) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 80) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (time_count > 2500)
             break;
         if (EXIT) {
@@ -1052,8 +1047,8 @@ void More2Test() {
         X.anglewrite = 500 + (X.speed * 75) - X.angle;
         Y.anglewrite = 500 + (Y.speed * 75) - Y.angle;
         limitServoAngle();
-        SetServo(ID1, X.anglewrite);
-        SetServo(ID2, Y.anglewrite);
+        ServoMove(ID1, X.anglewrite);
+        ServoMove(ID2, Y.anglewrite);
         if (EXIT) {
             OLED_Clear();
             break;

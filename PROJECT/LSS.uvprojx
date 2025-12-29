@@ -570,19 +570,9 @@
               <FilePath>..\DRIVERS\delay.c</FilePath>
             </File>
             <File>
-              <FileName>usart1.c</FileName>
+              <FileName>usart.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\DRIVERS\usart1.c</FilePath>
-            </File>
-            <File>
-              <FileName>usart2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\DRIVERS\usart2.c</FilePath>
-            </File>
-            <File>
-              <FileName>usart3.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\DRIVERS\usart3.c</FilePath>
+              <FilePath>..\DRIVERS\usart.c</FilePath>
             </File>
           </Files>
         </Group>

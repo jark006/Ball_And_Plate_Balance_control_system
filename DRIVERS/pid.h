@@ -2,7 +2,6 @@
 #define _PID_H_
 
 #include "stdint.h"
-#include "stdio.h"
 #include "stm32f10x.h"
 
 typedef struct _POINT {

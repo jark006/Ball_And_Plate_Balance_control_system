@@ -40,7 +40,6 @@
 #define LOBOT_SERVO_LED_ERROR_READ       36
 
 
-#define SetServo(a,b) LobotSerialServoMove(a, b, 40)
 #define ID1 1  //¶æ»úID
 #define ID2 2
 
@@ -49,4 +48,9 @@ void LobotSerialServoMove(uint8_t id, int16_t position, uint16_t time);
 void LobotSerialServoUnload(uint8_t id);
 void LobotSerialServoLoad(uint8_t id);
 void ServoResetPosition();
+
+static inline void ServoMove(uint8_t id, int16_t position){
+    LobotSerialServoMove(id, position, 40);
+}
+
 #endif
