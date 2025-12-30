@@ -80,7 +80,6 @@ void Funlist() {
     u8 isNeedRefresh = 1;
 
     OLED_Clear();
-    OLED_ShowString(10, 0, "Select Func", 16);
     ServoResetPosition();
 
     while (1) {
@@ -89,20 +88,19 @@ void Funlist() {
             funcIdx--;
             isNeedRefresh = 1;
         }
-        if ((DOWN || RIGHT) && funcIdx < 10) {
+        if ((DOWN || RIGHT) && funcIdx < (sizeof(FunctionTable) / sizeof(FunctionStreuct) - 1)) {
             funcIdx++;
             isNeedRefresh = 1;
         }
+        if (CONF) {
+            FunctionTable[funcIdx].fun();
+            isNeedRefresh = 1; // 从以上功能退出时，要刷新显示
+            OLED_Clear();
+        }
         if (isNeedRefresh) {
             isNeedRefresh = 0;
-            OLED_ShowString(10, 4, FunctionTable[funcIdx].name, 16);
-        }
-        if (CONF) {
-            if (funcIdx < sizeof(FunctionTable) / sizeof(FunctionStreuct)) {
-                FunctionTable[funcIdx].fun();
-            }
-            isNeedRefresh = 1; // 从以上功能退出时，要刷新显示
             OLED_ShowString(10, 0, "Select Func", 16);
+            OLED_ShowString(10, 4, FunctionTable[funcIdx].name, 16);
         }
     }
 }

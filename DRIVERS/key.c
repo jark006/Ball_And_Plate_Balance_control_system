@@ -30,14 +30,13 @@ void KEY_Init(void) {
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; // IO口速度为50MHz
     GPIO_Init(GPIOB, &GPIO_InitStructure);            // 初始化GPIOB
 
-    K1 = K2 = K3 = K4 = K5 = K6 = 1;
+    K1 = K2 = K3 = 1;
 }
 
 void key_scan(void) {
     keyValue = 0;
 
-    K1 = K2 = K3 = K4 = K5 = K6 = 1;
-    K1 = 0;
+    K1 = 0, K2 = 1, K3 = 1;
     if ((K4 == 0) || (K5 == 0) || (K6 == 0)) {
         delay_ms(DELAY);
         if (K4 == 0)
@@ -51,8 +50,7 @@ void key_scan(void) {
         return;
     }
 
-    K1 = K2 = K3 = K4 = K5 = K6 = 1;
-    K2 = 0;
+    K1 = 1, K2 = 0, K3 = 1;
     if ((K4 == 0) || (K5 == 0) || (K6 == 0)) {
         delay_ms(DELAY);
         if (K4 == 0)
@@ -66,8 +64,7 @@ void key_scan(void) {
         return;
     }
 
-    K1 = K2 = K3 = K4 = K5 = K6 = 1;
-    K3 = 0;
+    K1 = 1, K2 = 1, K3 = 0;
     if ((K4 == 0) || (K5 == 0) || (K6 == 0)) {
         delay_ms(DELAY);
         if (K4 == 0)

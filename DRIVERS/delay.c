@@ -1,7 +1,7 @@
 #include "delay.h"
 
-static u32 fac_us = 0;  // us延时倍乘数
-static u32 fac_ms = 0;  // ms延时倍乘数
+static u32 fac_us = 0; // us延时倍乘数
+static u32 fac_ms = 0; // ms延时倍乘数
 
 extern u32 SystemCoreClock;
 
@@ -20,9 +20,7 @@ void delay_us(u32 nus) {
     SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk; // 开始倒数
     do {
         temp = SysTick->CTRL;
-    } while (
-        temp & 0x01 &&
-        !(temp & (1 << 16))); // 等待时间到达 //bit16置一说明时间到，跳出循环
+    } while (temp & 0x01 && !(temp & (1 << 16))); // 等待时间到达
     SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk; // 关闭计数器
     SysTick->VAL = 0X00;                       // 清空计数器
 }
