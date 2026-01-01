@@ -14,16 +14,11 @@
 #include "timer.h"
 #include "usart.h"
 
-#define ANGLE_MAX 700 // 舵机最大转角
-#define ANGLE_MIN 300 // 舵机最小转角
-
 typedef struct {
     void (*fun)(void);
-    const char *name;
-} FunctionStreuct;
+    const char* name;
+} FunctionStruct;
 
-void NVIC_Priority_Init();
-void Funlist(void);
 void ShowBall(void);
 void SetPoint(void);
 
@@ -39,38 +34,23 @@ void More4(void);
 void More2Test();
 
 // 初始化所有坐标
-Coordinate X = {0, 0, 0, 22, 66, 110, 22, 66, 110, 22, 66, 110, 0, 0, 0, 0};
-Coordinate Y = {0, 0, 0, 17, 17, 17, 62, 62, 62, 105, 105, 105, 0, 0, 0, 0};
+Coordinate X = { 0, 0, 0, { 0, 22, 66, 110, 22, 66, 110, 22, 66, 110 }, 0, 0, 0, 0 };
+Coordinate Y = { 0, 0, 0, { 0, 17, 17, 17, 62, 62, 62, 105, 105, 105 }, 0, 0, 0, 0 };
 
 /***********************************************************************************************************
 主程序
 ***********************************************************************************************************/
 int main(void) {
-    SystemInit();         // 系统时钟等初始化
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);// 2位抢占，2位响应
     Delay_Init();         // 延时初始化
-    NVIC_Priority_Init(); // 中断分组
     USART1_Init(115200);  // 串口1 打印调试
     USART2_Init(115200);  // 串口2 控制舵机
     USART3_Init(115200);  // 串口3 接收OpenMV的小球位置
     TIM2_Init(300, 7200); // 定时30ms
     KEY_Init();
-    PID_Init();
     OLED_Init();
 
-    Funlist();
-
-    return 0;
-}
-
-// 设置NVIC中断分组2
-void NVIC_Priority_Init() {
-    // 2位抢占优先级，2位响应优先级
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-}
-
-// 功能列表
-void Funlist() {
-    const FunctionStreuct FunctionTable[] = {
+    const FunctionStruct FunctionTable[] = {
         {ShowBall, "ShowBall"}, {SetPoint, "SetPoint"}, {Base1, "Base 1  "},
         {Base2, "Base 2  "},    {Base3, "Base 3  "},    {Base4, "Base 4  "},
         {More1, "More 1  "},    {More2, "More 2  "},    {More3, "More 3  "},
@@ -80,6 +60,7 @@ void Funlist() {
     u8 isNeedRefresh = 1;
 
     OLED_Clear();
+    PID_Init();
     ServoResetPosition();
 
     while (1) {
@@ -88,7 +69,7 @@ void Funlist() {
             funcIdx--;
             isNeedRefresh = 1;
         }
-        if ((DOWN || RIGHT) && funcIdx < (sizeof(FunctionTable) / sizeof(FunctionStreuct) - 1)) {
+        if ((DOWN || RIGHT) && funcIdx < (sizeof(FunctionTable) / sizeof(FunctionStruct) - 1)) {
             funcIdx++;
             isNeedRefresh = 1;
         }
@@ -106,7 +87,10 @@ void Funlist() {
 }
 
 // 限制舵机转角在合理范围内
-void limitServoAngle() {
+static inline void limitServoAngle() {
+    const int ANGLE_MAX = 700; // 舵机最大转角
+    const int ANGLE_MIN = 300; // 舵机最小转角
+
     if (X.anglewrite > ANGLE_MAX)
         X.anglewrite = ANGLE_MAX;
     else if (X.anglewrite < ANGLE_MIN)
